@@ -142,7 +142,7 @@
                 <?php endif; ?>
             </td>
             <td class="title-cell">
-                <div style="font-size: 10pt; font-weight: bold;">DANFSe v1.0</div>
+                <div style="font-size: 10pt; font-weight: bold;">DANFSe v2.0</div>
                 <div style="font-size: 8pt; font-weight: bold;">Documento Auxiliar da NFS-e</div>
                 <?php if ($data['ambiente'] == 2): ?>
                     <div style="color: red; font-weight: bold;">NFS-e SEM VALIDADE JURÍDICA</div>
@@ -167,6 +167,10 @@
                     </tr>
                 </table>
                 <?php endif; ?>
+                <div style="font-size: 5.5pt; padding-top: 1pt;">
+                    Ambiente Gerador: <?= $data['amb_gerador'] ?><br>
+                    Tipo de Ambiente: <?= $data['ambiente'] == 2 ? 'Homologação' : 'Produção' ?>
+                </div>
             </td>
         </tr>
     </table>
@@ -216,6 +220,24 @@
                     <span class="value"><?= $data['emissao_dps'] ?></span>
                 </td>
             </tr>
+            <tr>
+                <td>
+                    <span class="label">Emitente da NFS-e</span>
+                    <span class="value"><?= $data['tipo_emitente'] ?></span>
+                </td>
+                <td>
+                    <?php if ($data['situacao'] !== ''): ?>
+                    <span class="label">Situação da NFS-e</span>
+                    <span class="value"><?= $data['situacao'] ?></span>
+                    <?php endif; ?>
+                </td>
+                <td>
+                    <?php if ($data['finalidade'] !== ''): ?>
+                    <span class="label">Finalidade</span>
+                    <span class="value"><?= $data['finalidade'] ?></span>
+                    <?php endif; ?>
+                </td>
+            </tr>
         </table>
     </div>
 
@@ -224,54 +246,53 @@
         <table>
             <tr>
                 <td style="width: 25%; font-weight: bold; font-size: 7pt;">
-                    <span class="label section-title">EMITENTE DA NFS-e</span>
-                    <span class="value">Prestador do Serviço</span>
+                    <span class="section-title">PRESTADOR / FORNECEDOR</span>
                 </td>
                 <td style="width: 25%;">
                     <span class="label">CNPJ / CPF / NIF</span>
-                    <span class="value"><?= $data['emitente']['cnpj_cpf'] ?></span>
+                    <span class="value"><?= $data['prestador']['cnpj_cpf'] ?></span>
                 </td>
                 <td style="width: 25%;">
                     <span class="label">Inscrição Municipal</span>
-                    <span class="value"><?= $data['emitente']['im'] ?></span>
+                    <span class="value"><?= $data['prestador']['im'] ?></span>
                 </td>
                 <td style="width: 25%;">
                     <span class="label">Telefone</span>
-                    <span class="value"><?= $data['emitente']['telefone'] ?></span>
+                    <span class="value"><?= $data['prestador']['telefone'] ?></span>
                 </td>
             </tr>
             <tr>
                 <td colspan="2">
                     <span class="label">Nome / Nome Empresarial</span>
-                    <span class="value"><?= $data['emitente']['nome'] ?></span>
+                    <span class="value"><?= $data['prestador']['nome'] ?></span>
                 </td>
                 <td colspan="2">
                     <span class="label">E-mail</span>
-                    <span class="value"><?= $data['emitente']['email'] ?></span>
+                    <span class="value"><?= $data['prestador']['email'] ?></span>
                 </td>
             </tr>
             <tr>
                 <td colspan="2">
                     <span class="label">Endereço</span>
-                    <span class="value"><?= $data['emitente']['endereco'] ?></span>
+                    <span class="value"><?= $data['prestador']['endereco'] ?></span>
                 </td>
                 <td>
                     <span class="label">Município</span>
-                    <span class="value"><?= $data['emitente']['municipio'] ?></span>
+                    <span class="value"><?= $data['prestador']['municipio'] ?></span>
                 </td>
                 <td>
-                    <span class="label">CEP</span>
-                    <span class="value"><?= $data['emitente']['cep'] ?></span>
+                    <span class="label">Código IBGE / CEP</span>
+                    <span class="value"><?= $data['prestador']['codigo_ibge_cep'] ?></span>
                 </td>
             </tr>
             <tr>
                 <td colspan="2">
                     <span class="label">Simples Nacional na Data de Competência</span>
-                    <span class="value"><?= $data['emitente']['simples_nacional'] ?></span>
+                    <span class="value"><?= $data['prestador']['simples_nacional'] ?></span>
                 </td>
                 <td colspan="2">
                     <span class="label">Regime de Apuração Tributária pelo SN</span>
-                    <span class="value"><?= $data['emitente']['regime_sn'] ?></span>
+                    <span class="value"><?= $data['prestador']['regime_sn'] ?></span>
                 </td>
             </tr>
         </table>
@@ -317,12 +338,62 @@
                     <span class="value"><?= $data['tomador']['municipio'] ?></span>
                 </td>
                 <td style="width: 25%;">
-                    <span class="label">CEP</span>
-                    <span class="value"><?= $data['tomador']['cep'] ?></span>
+                    <span class="label">Código IBGE / CEP</span>
+                    <span class="value"><?= $data['tomador']['codigo_ibge_cep'] ?></span>
                 </td>
             </tr>
         </table>
     </div>
+
+    <!-- Destinatário -->
+    <?php if ($data['destinatario'] !== null): ?>
+    <div class="bordered-section">
+        <table>
+            <tr>
+                <td style="width: 25%; font-weight: bold; font-size: 7pt;">
+                    <span class="section-title">DESTINATÁRIO DA OPERAÇÃO</span>
+                </td>
+                <td style="width: 25%;">
+                    <span class="label">CNPJ / CPF / NIF</span>
+                    <span class="value"><?= $data['destinatario']['cnpj_cpf'] ?></span>
+                </td>
+                <td style="width: 25%;">
+                    <span class="label">Telefone</span>
+                    <span class="value"><?= $data['destinatario']['telefone'] ?></span>
+                </td>
+                <td style="width: 25%;"></td>
+            </tr>
+            <tr>
+                <td colspan="2" style="width: 50%;">
+                    <span class="label">Nome / Nome Empresarial</span>
+                    <span class="value"><?= $data['destinatario']['nome'] ?></span>
+                </td>
+                <td colspan="2" style="width: 50%;">
+                    <span class="label">E-mail</span>
+                    <span class="value"><?= $data['destinatario']['email'] ?></span>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="width: 50%;">
+                    <span class="label">Endereço</span>
+                    <span class="value"><?= $data['destinatario']['endereco'] ?></span>
+                </td>
+                <td style="width: 25%;">
+                    <span class="label">Município</span>
+                    <span class="value"><?= $data['destinatario']['municipio'] ?></span>
+                </td>
+                <td style="width: 25%;">
+                    <span class="label">Código IBGE / CEP</span>
+                    <span class="value"><?= $data['destinatario']['codigo_ibge_cep'] ?></span>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <?php else: ?>
+    <div class="bordered-section" style="text-align: center; font-weight: normal; font-size: 7pt;">
+        <?= $data['destinatario_msg'] ?>
+    </div>
+    <?php endif; ?>
 
     <!-- Intermediário -->
     <?php if ($data['intermediario'] !== null): ?>
@@ -365,8 +436,8 @@
                     <span class="value"><?= $data['intermediario']['municipio'] ?></span>
                 </td>
                 <td style="width: 25%;">
-                    <span class="label">CEP</span>
-                    <span class="value"><?= $data['intermediario']['cep'] ?></span>
+                    <span class="label">Código IBGE / CEP</span>
+                    <span class="value"><?= $data['intermediario']['codigo_ibge_cep'] ?></span>
                 </td>
             </tr>
         </table>
@@ -401,6 +472,12 @@
                 <td style="width: 25%;">
                     <span class="label">País da Prestação</span>
                     <span class="value"><?= $data['servico']['pais_prestacao'] ?></span>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <span class="label">Código da NBS</span>
+                    <span class="value"><?= $data['servico']['codigo_nbs'] ?></span>
                 </td>
             </tr>
             <tr>
@@ -517,10 +594,13 @@
                     <span class="value"><?= $data['tributacao_federal']['contrib_sociais'] ?? '-' ?></span>
                 </td>
                 <td style="width: 25%;">
+                    <?php if ($data['tributacao_federal']['mostrar_pis_cofins']): ?>
                     <span class="label">Descrição Contrib. Sociais - Retidas</span>
                     <span class="value"><?= $data['tributacao_federal']['desc_contrib_sociais'] ?? '-' ?></span>
+                    <?php endif; ?>
                 </td>
             </tr>
+            <?php if ($data['tributacao_federal']['mostrar_pis_cofins']): ?>
             <tr>
                 <td colspan="2">
                     <span class="label">PIS - Débito Apuração Própria</span>
@@ -531,8 +611,88 @@
                     <span class="value"><?= $data['tributacao_federal']['cofins'] ?? '-' ?></span>
                 </td>
             </tr>
+            <?php endif; ?>
         </table>
     </div>
+
+    <!-- Tributação IBS/CBS -->
+    <?php if ($data['ibs_cbs'] !== null): ?>
+    <div class="bordered-section">
+        <table>
+            <tr>
+                <td colspan="4" class="section-header">
+                    <span class="section-title">TRIBUTAÇÃO IBS / CBS</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 25%;">
+                    <span class="label">CST / cClassTrib</span>
+                    <span class="value"><?= $data['ibs_cbs']['cst_classtrib'] ?></span>
+                </td>
+                <td style="width: 25%;">
+                    <span class="label">Ind. Operação / Cód. IBGE / Município Incidência</span>
+                    <span class="value"><?= $data['ibs_cbs']['indicador_operacao'] ?></span>
+                </td>
+                <td style="width: 25%;">
+                    <span class="label">Exclusões e Reduções da BC</span>
+                    <span class="value"><?= $data['ibs_cbs']['exclusoes_reducoes'] ?></span>
+                </td>
+                <td style="width: 25%;">
+                    <span class="label">BC após Exclusões e Reduções</span>
+                    <span class="value"><?= $data['ibs_cbs']['bc'] ?></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="label">Red. Alíquota IBS / CBS</span>
+                    <span class="value"><?= $data['ibs_cbs']['red_aliquota'] ?></span>
+                </td>
+                <td>
+                    <span class="label">Alíquota IBS UF / Mun</span>
+                    <span class="value"><?= $data['ibs_cbs']['aliquota_ibs'] ?></span>
+                </td>
+                <td>
+                    <span class="label">Alíq. Efetiva Municipal - IBS</span>
+                    <span class="value"><?= $data['ibs_cbs']['aliq_efetiva_mun'] ?></span>
+                </td>
+                <td>
+                    <span class="label">Valor Apurado Municipal - IBS</span>
+                    <span class="value"><?= $data['ibs_cbs']['valor_apurado_mun'] ?></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="label">Alíq. Efetiva Estadual - IBS</span>
+                    <span class="value"><?= $data['ibs_cbs']['aliq_efetiva_uf'] ?></span>
+                </td>
+                <td>
+                    <span class="label">Valor Apurado Estadual - IBS</span>
+                    <span class="value"><?= $data['ibs_cbs']['valor_apurado_uf'] ?></span>
+                </td>
+                <td>
+                    <span class="label">Valor Total Apurado - IBS</span>
+                    <span class="value"><?= $data['ibs_cbs']['valor_total_ibs'] ?></span>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="label">Alíquota - CBS</span>
+                    <span class="value"><?= $data['ibs_cbs']['aliquota_cbs'] ?></span>
+                </td>
+                <td>
+                    <span class="label">Alíquota Efetiva - CBS</span>
+                    <span class="value"><?= $data['ibs_cbs']['aliq_efetiva_cbs'] ?></span>
+                </td>
+                <td>
+                    <span class="label">Valor Total Apurado - CBS</span>
+                    <span class="value"><?= $data['ibs_cbs']['valor_total_cbs'] ?></span>
+                </td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+    <?php endif; ?>
 
     <!-- Valor Total -->
     <div class="bordered-section">
@@ -574,6 +734,18 @@
                     <span class="value" style="font-weight: bold;"><?= $data['totais']['valor_liquido'] ?></span>
                 </td>
             </tr>
+            <?php if ($data['ibs_cbs'] !== null): ?>
+            <tr>
+                <td colspan="2">
+                    <span class="label">Total do IBS/CBS</span>
+                    <span class="value"><?= $data['totais']['total_ibs_cbs'] ?></span>
+                </td>
+                <td colspan="2">
+                    <span class="label">Valor Líquido da NFS-e + IBS/CBS</span>
+                    <span class="value" style="font-weight: bold;"><?= $data['totais']['valor_liquido_ibscbs'] ?></span>
+                </td>
+            </tr>
+            <?php endif; ?>
         </table>
     </div>
 

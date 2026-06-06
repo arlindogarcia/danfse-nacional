@@ -5589,6 +5589,6 @@ final class Municipios
     {
         $code = (int) $cMun;
         $m    = self::MAP[$code] ?? null;
-        return $m !== null ? $m['nome'] . ' - ' . $m['uf'] : (string) $cMun;
+        return $m !== null ? $m['nome'] . ' / ' . $m['uf'] : (string) $cMun;
     }
 }

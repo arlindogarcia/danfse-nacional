@@ -2,14 +2,16 @@
 
 namespace DanfseNacional\Dto;
 
-readonly class Tomador
+/**
+ * Destinatário da operação (NFSe/infNFSe/DPS/infDPS/IBSCBS/dest = TCRTCInfoDest).
+ */
+readonly class Destinatario
 {
     public function __construct(
         public string $CNPJ = '',
         public string $CPF = '',
         public string $NIF = '',
         public string $cNaoNIF = '',
-        public string $IM = '',
         public string $xNome = '',
         public ?Endereco $end = null,
         public string $fone = '',

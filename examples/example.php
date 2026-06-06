@@ -59,4 +59,22 @@ file_put_contents(__DIR__ . '/danfse_com_config.html', $html);
 
 echo "\nPDF: {$output} (" . number_format(strlen($pdf) / 1024, 1) . " KB)\n";
 
+// --- Exemplo 4: NFS-e com tributação IBS/CBS (Reforma Tributária) ---
+// Inclui os blocos "Destinatário da Operação" e "Tributação IBS/CBS",
+// além de "Total do IBS/CBS" e "Valor Líquido da NFS-e + IBS/CBS".
+
+$xmlIbsCbs = file_get_contents(__DIR__ . '/nfse_exemplo_ibscbs.xml');
+
+$generator = new DanfseGenerator();
+$pdf = $generator->generateFromXml($xmlIbsCbs);
+
+$output = __DIR__ . '/danfse_ibscbs.pdf';
+file_put_contents($output, $pdf);
+
+$nfse = $generator->parseXml($xmlIbsCbs);
+$html = $generator->generateHtml($nfse);
+file_put_contents(__DIR__ . '/danfse_ibscbs.html', $html);
+
+echo "\nPDF IBS/CBS: {$output} (" . number_format(strlen($pdf) / 1024, 1) . " KB)\n";
+
 echo "\nConcluído. Os PDFs foram salvos em " . __DIR__ . "\n";

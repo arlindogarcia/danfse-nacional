@@ -7,6 +7,7 @@ readonly class Emitente
     public function __construct(
         public string $CNPJ = '',
         public string $CPF = '',
+        public string $IM = '',
         public string $xNome = '',
         public ?EnderecoEmitente $enderNac = null,
         public string $fone = '',

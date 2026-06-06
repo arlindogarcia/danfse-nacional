@@ -6,6 +6,10 @@ readonly class TribMunicipal
 {
     public function __construct(
         public string $tribISSQN = '',
+        public string $cPaisResult = '',
+        public string $tpImunidade = '',
+        public ?ExigSuspensa $exigSusp = null,
+        public ?BeneficioMunicipal $BM = null,
         public string $tpRetISSQN = '',
         public string $pAliq = '',
         public string $vBC = '',

@@ -13,16 +13,17 @@ class Formatter
             return '-';
         }
 
-        $value = preg_replace('/\D/', '', $value);
+        $digits = preg_replace('/\D/', '', $value);
 
-        if (strlen($value) === 14) {
-            return preg_replace('/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/', '$1.$2.$3/$4-$5', $value);
+        if (strlen($digits) === 14) {
+            return preg_replace('/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/', '$1.$2.$3/$4-$5', $digits);
         }
 
-        if (strlen($value) === 11) {
-            return preg_replace('/(\d{3})(\d{3})(\d{3})(\d{2})/', '$1.$2.$3-$4', $value);
+        if (strlen($digits) === 11) {
+            return preg_replace('/(\d{3})(\d{3})(\d{3})(\d{2})/', '$1.$2.$3-$4', $digits);
         }
 
+        // NIF ou outro identificador (pode ser alfanumérico): retorna como informado.
         return $value;
     }
 
