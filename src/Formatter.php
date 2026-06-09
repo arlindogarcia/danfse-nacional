@@ -122,6 +122,6 @@ class Formatter
             return $value;
         }
 
-        return mb_substr($value, 0, $limit) . $end;
+        return mb_substr($value, 0, $limit - 3) . $end;
     }
 }
