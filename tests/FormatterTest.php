@@ -29,6 +29,26 @@ class FormatterTest extends TestCase
         $this->assertSame('18.587.777/0001-60', $this->fmt->cnpjCpf('18.587.777/0001-60'));
     }
 
+    public function test_cnpj_alfanumerico_sem_mascara(): void
+    {
+        $this->assertSame('AB.123.CDE/4567-89', $this->fmt->cnpjCpf('AB123CDE456789'));
+    }
+
+    public function test_cnpj_alfanumerico_ja_formatado(): void
+    {
+        $this->assertSame('AB.123.CDE/4567-89', $this->fmt->cnpjCpf('AB.123.CDE/4567-89'));
+    }
+
+    public function test_cnpj_alfanumerico_lowercase_e_normalizado_para_maiusculo(): void
+    {
+        $this->assertSame('AB.123.CDE/4567-89', $this->fmt->cnpjCpf('ab.123.cde/4567-89'));
+    }
+
+    public function test_identificador_desconhecido_retorna_como_informado(): void
+    {
+        $this->assertSame('NIF-12345', $this->fmt->cnpjCpf('NIF-12345'));
+    }
+
     public function test_phone_10_digits(): void
     {
         $this->assertSame('(21) 3619-9708', $this->fmt->phone('2136199708'));
@@ -69,7 +89,7 @@ class FormatterTest extends TestCase
 
     public function test_limit(): void
     {
-        $this->assertSame('Processamento de dad...', $this->fmt->limit('Processamento de dados', 20));
+        $this->assertSame('Processamento de ...', $this->fmt->limit('Processamento de dados', 20));
         $this->assertSame('curto', $this->fmt->limit('curto', 20));
     }
 

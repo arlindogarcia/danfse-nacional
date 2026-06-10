@@ -13,17 +13,21 @@ class Formatter
             return '-';
         }
 
-        $digits = preg_replace('/\D/', '', $value);
+        // Remove apenas separadores da máscara; preserva letras do CNPJ alfanumérico.
+        $clean = preg_replace('/[\.\-\/\s]/', '', $value);
 
-        if (strlen($digits) === 14) {
-            return preg_replace('/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/', '$1.$2.$3/$4-$5', $digits);
+        // CNPJ: 14 caracteres alfanuméricos com os 2 últimos (DV) obrigatoriamente numéricos.
+        if (strlen($clean) === 14 && preg_match('/^[A-Z0-9]{12}\d{2}$/i', $clean)) {
+            $clean = strtoupper($clean);
+            return preg_replace('/^([A-Z0-9]{2})([A-Z0-9]{3})([A-Z0-9]{3})([A-Z0-9]{4})(\d{2})$/', '$1.$2.$3/$4-$5', $clean);
         }
 
-        if (strlen($digits) === 11) {
-            return preg_replace('/(\d{3})(\d{3})(\d{3})(\d{2})/', '$1.$2.$3-$4', $digits);
+        // CPF: 11 dígitos numéricos.
+        if (strlen($clean) === 11 && ctype_digit($clean)) {
+            return preg_replace('/(\d{3})(\d{3})(\d{3})(\d{2})/', '$1.$2.$3-$4', $clean);
         }
 
-        // NIF ou outro identificador (pode ser alfanumérico): retorna como informado.
+        // NIF ou outro identificador: retorna como informado.
         return $value;
     }
 
@@ -111,6 +115,21 @@ class Formatter
 
         if (strlen($value) === 6) {
             return preg_replace('/(\d{2})(\d{2})(\d{2})/', '$1.$2.$3', $value);
+        }
+
+        return $value;
+    }
+
+    public function codigoNbs(string $value): string
+    {
+        if ($value === '' || $value === '-') {
+            return '-';
+        }
+
+        $value = preg_replace('/\D/', '', $value);
+
+        if (strlen($value) === 9) {
+            return preg_replace('/(\d{1})(\d{4})(\d{2})(\d{2})/', '$1.$2.$3.$4', $value);
         }
 
         return $value;
