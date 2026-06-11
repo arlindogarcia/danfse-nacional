@@ -16,7 +16,7 @@
         "source": "https://github.com/andrevabo/danfse-nacional"
     },
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "ext-simplexml": "*",
         "ext-mbstring": "*",
         "ext-fileinfo": "*",
@@ -48,12 +48,14 @@
         ]
     },
     "scripts": {
-        "test": "vendor/bin/phpunit"
+        "test": "vendor/bin/phpunit",
+        "watch": "php scripts/dev-watch.php"
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
     "config": {
         "sort-packages": true,
-        "optimize-autoloader": true
+        "optimize-autoloader": true,
+        "process-timeout": 0
     }
 }
