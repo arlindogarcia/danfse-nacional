@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 class DanfseConfigTest extends TestCase
 {
-    public function test_no_logo_specified_uses_default_from_assets(): void
+    public function test_sem_logo_especificado_usa_padrao_dos_assets(): void
     {
         $config = new DanfseConfig();
 
@@ -16,14 +16,14 @@ class DanfseConfigTest extends TestCase
         $this->assertStringStartsWith('data:image/png;base64,', $config->logoDataUri);
     }
 
-    public function test_logo_false_disables_logo(): void
+    public function test_logo_false_desabilita_logo(): void
     {
         $config = new DanfseConfig(logoPath: false);
 
         $this->assertNull($config->logoDataUri);
     }
 
-    public function test_logo_path_is_converted_to_data_uri(): void
+    public function test_caminho_logo_convertido_para_data_uri(): void
     {
         $path = __DIR__ . '/fixtures/logo.png';
         $config = new DanfseConfig(logoPath: $path);
@@ -35,14 +35,14 @@ class DanfseConfigTest extends TestCase
         $this->assertSame($expected, $config->logoDataUri);
     }
 
-    public function test_logo_data_uri_is_used_directly(): void
+    public function test_logo_data_uri_usado_diretamente(): void
     {
         $config = new DanfseConfig(logoDataUri: 'data:image/png;base64,abc123');
 
         $this->assertSame('data:image/png;base64,abc123', $config->logoDataUri);
     }
 
-    public function test_logo_data_uri_takes_precedence_over_path(): void
+    public function test_logo_data_uri_tem_precedencia_sobre_caminho(): void
     {
         $config = new DanfseConfig(
             logoDataUri: 'data:image/png;base64,explicit',
@@ -52,7 +52,7 @@ class DanfseConfigTest extends TestCase
         $this->assertSame('data:image/png;base64,explicit', $config->logoDataUri);
     }
 
-    public function test_logo_false_takes_precedence_over_data_uri(): void
+    public function test_logo_false_tem_precedencia_sobre_data_uri(): void
     {
         $config = new DanfseConfig(
             logoDataUri: 'data:image/png;base64,explicit',
@@ -62,7 +62,7 @@ class DanfseConfigTest extends TestCase
         $this->assertNull($config->logoDataUri);
     }
 
-    public function test_invalid_logo_path_throws(): void
+    public function test_caminho_logo_invalido_lanca_excecao(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageMatches('/não encontrado/');
@@ -70,7 +70,7 @@ class DanfseConfigTest extends TestCase
         new DanfseConfig(logoPath: '/caminho/inexistente/logo.png');
     }
 
-    public function test_municipality_logo_path_is_converted(): void
+    public function test_municipality_caminho_logo_e_convertido(): void
     {
         $path = __DIR__ . '/fixtures/logo.png';
         $branding = new MunicipalityBranding(
@@ -82,14 +82,14 @@ class DanfseConfigTest extends TestCase
         $this->assertStringStartsWith('data:image/png;base64,', $branding->logoDataUri);
     }
 
-    public function test_municipality_without_logo_is_null(): void
+    public function test_municipality_sem_logo_e_nulo(): void
     {
         $branding = new MunicipalityBranding(name: 'Prefeitura de Niterói');
 
         $this->assertNull($branding->logoDataUri);
     }
 
-    public function test_municipality_invalid_logo_path_throws(): void
+    public function test_municipality_caminho_logo_invalido_lanca_excecao(): void
     {
         $this->expectException(\InvalidArgumentException::class);
 

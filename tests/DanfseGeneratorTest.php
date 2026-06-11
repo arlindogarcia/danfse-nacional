@@ -19,7 +19,7 @@ class DanfseGeneratorTest extends TestCase
         $this->assertNotFalse($this->realXml, "real_nfse.xml não encontrado em $path");
     }
 
-    public function test_parse_xml_returns_nfse_dto(): void
+    public function test_parse_xml_retorna_nfse_dto(): void
     {
         $generator = new DanfseGenerator();
         $nfse = $generator->parseXml($this->realXml);
@@ -28,7 +28,7 @@ class DanfseGeneratorTest extends TestCase
         $this->assertNotNull($nfse->infNFSe);
     }
 
-    public function test_parsed_dto_fields_match_xml(): void
+    public function test_campos_dto_parseado_correspondem_ao_xml(): void
     {
         $generator = new DanfseGenerator();
         $nfse = $generator->parseXml($this->realXml);
@@ -58,7 +58,7 @@ class DanfseGeneratorTest extends TestCase
         $this->assertSame('CLIENTE FICTICIO COMERCIO S.A.', $toma->xNome);
     }
 
-    public function test_generate_from_xml_returns_pdf_binary(): void
+    public function test_gera_binario_pdf_a_partir_do_xml(): void
     {
         $generator = new DanfseGenerator();
         $pdf = $generator->generateFromXml($this->realXml);
@@ -67,7 +67,7 @@ class DanfseGeneratorTest extends TestCase
         $this->assertStringStartsWith('%PDF-', $pdf);
     }
 
-    public function test_generate_with_config(): void
+    public function test_gera_com_config(): void
     {
         $config = new DanfseConfig(
             municipality: new MunicipalityBranding(
@@ -82,7 +82,7 @@ class DanfseGeneratorTest extends TestCase
         $this->assertStringStartsWith('%PDF-', $pdf);
     }
 
-    public function test_two_step_generation(): void
+    public function test_geracao_em_duas_etapas(): void
     {
         $generator = new DanfseGenerator();
         $nfse = $generator->parseXml($this->realXml);
@@ -91,7 +91,7 @@ class DanfseGeneratorTest extends TestCase
         $this->assertStringStartsWith('%PDF-', $pdf);
     }
 
-    public function test_template_data_matches_expected(): void
+    public function test_dados_do_template_correspondem_ao_esperado(): void
     {
         $generator = new DanfseGenerator();
         $nfse = $generator->parseXml($this->realXml);
@@ -122,7 +122,7 @@ class DanfseGeneratorTest extends TestCase
 
         // Serviço
         $this->assertSame('01.07.00', $data['servico']['codigo_trib_nacional']);
-        $this->assertSame('110811000', $data['servico']['codigo_nbs']);
+        $this->assertSame('1.1081.10.00', $data['servico']['codigo_nbs']);
 
         // Tributação federal
         $this->assertSame('R$ 15,00', $data['tributacao_federal']['contrib_sociais']);
@@ -139,7 +139,7 @@ class DanfseGeneratorTest extends TestCase
         $this->assertSame('Operação Tributável', $data['tributacao_municipal']['tributacao_issqn']);
         $this->assertSame('Retido pelo Tomador', $data['tributacao_municipal']['retencao_issqn']);
         $this->assertSame('Sociedade de Profissionais', $data['tributacao_municipal']['regime_especial']);
-        $this->assertSame('Niterói', $data['tributacao_municipal']['municipio_incidencia']);
+        $this->assertSame('Niterói / RJ / BR', $data['tributacao_municipal']['municipio_incidencia']);
 
         // Emitente: Simples Nacional
         $this->assertSame(
@@ -148,7 +148,7 @@ class DanfseGeneratorTest extends TestCase
         );
     }
 
-    public function test_finalidade_shown_when_finNFSe_present(): void
+    public function test_finalidade_exibida_quando_finNFSe_presente(): void
     {
         // Injeta o grupo IBS/CBS com finNFSe (modelo v2.0) no infDPS.
         $xml = str_replace(
@@ -178,7 +178,7 @@ class DanfseGeneratorTest extends TestCase
         $this->assertNull($data['ibs_cbs']);
     }
 
-    public function test_ibscbs_example_fields(): void
+    public function test_ibscbs_campos_do_exemplo(): void
     {
         $path = __DIR__ . '/../examples/nfse_exemplo_ibscbs.xml';
         $xml = file_get_contents($path);
@@ -201,7 +201,7 @@ class DanfseGeneratorTest extends TestCase
         // Bloco IBS/CBS
         $this->assertNotNull($data['ibs_cbs']);
         $this->assertSame('000 / 000001', $data['ibs_cbs']['cst_classtrib']);
-        $this->assertSame('100000 / 3303302 / Niterói', $data['ibs_cbs']['indicador_operacao']);
+        $this->assertSame('100000 / 3303302 / Niterói / RJ', $data['ibs_cbs']['indicador_operacao']);
         $this->assertSame('R$ 1.500,00', $data['ibs_cbs']['bc']);
         $this->assertSame('0.10% / 0.05%', $data['ibs_cbs']['aliquota_ibs']);
         $this->assertSame('R$ 0,75', $data['ibs_cbs']['valor_apurado_mun']);
@@ -216,7 +216,7 @@ class DanfseGeneratorTest extends TestCase
         $this->assertSame('R$ 1.308,50', $data['totais']['valor_liquido_ibscbs']);
     }
 
-    public function test_ibscbs_example_generates_pdf(): void
+    public function test_ibscbs_exemplo_gera_pdf(): void
     {
         $xml = file_get_contents(__DIR__ . '/../examples/nfse_exemplo_ibscbs.xml');
         $pdf = (new DanfseGenerator())->generateFromXml($xml);
@@ -313,7 +313,7 @@ class DanfseGeneratorTest extends TestCase
         $this->assertStringNotContainsString('Descrição Contrib. Sociais - Retidas', $html2027);
     }
 
-    public function test_homologacao_environment_flag(): void
+    public function test_flag_ambiente_homologacao(): void
     {
         // Substitui tpAmb=1 (produção) por tpAmb=2 (homologação)
         $xml = str_replace('<tpAmb>1</tpAmb>', '<tpAmb>2</tpAmb>', $this->realXml);
@@ -326,7 +326,7 @@ class DanfseGeneratorTest extends TestCase
         $this->assertSame(2, $data['ambiente']);
     }
 
-    public function test_generate_pdf_size_is_reasonable(): void
+    public function test_tamanho_do_pdf_gerado_e_razoavel(): void
     {
         $generator = new DanfseGenerator();
         $pdf = $generator->generateFromXml($this->realXml);
@@ -335,5 +335,434 @@ class DanfseGeneratorTest extends TestCase
         $size = strlen($pdf);
         $this->assertGreaterThan(1000, $size, 'PDF parece muito pequeno');
         $this->assertLessThan(5_000_000, $size, 'PDF parece muito grande');
+    }
+
+    // ── Campos de identificação e cabeçalho ──────────────────────────────────
+
+    public function test_campos_identificacao(): void
+    {
+        $data = (new \DanfseNacional\Template\DanfseTemplate())
+            ->buildData((new DanfseGenerator())->parseXml($this->realXml));
+
+        $this->assertSame('10', $data['numero_nfse']);
+        $this->assertSame('15/01/2026', $data['competencia']);
+        $this->assertSame('5', $data['numero_dps']);
+        $this->assertSame('20261', $data['serie_dps']);
+        $this->assertStringContainsString('15/01/2026', $data['emissao_dps']);
+        $this->assertStringContainsString('15/01/2026', $data['emissao_nfse']);
+    }
+
+    // ── Campos de prestador e tomador não cobertos ────────────────────────────
+
+    public function test_prestador_email_e_regime_sn(): void
+    {
+        $data = (new \DanfseNacional\Template\DanfseTemplate())
+            ->buildData((new DanfseGenerator())->parseXml($this->realXml));
+
+        $this->assertSame('financeiro@empresaexemplo.com.br', $data['prestador']['email']);
+        // Regime SN = 2 (Regime de Caixa)
+        $this->assertNotEmpty($data['prestador']['regime_sn']);
+    }
+
+    public function test_tomador_campos_secundarios(): void
+    {
+        $data = (new \DanfseNacional\Template\DanfseTemplate())
+            ->buildData((new DanfseGenerator())->parseXml($this->realXml));
+
+        $this->assertSame('654321', $data['tomador']['im']);
+        $this->assertSame('(11) 98765-4321', $data['tomador']['telefone']);
+        $this->assertSame('contato@clienteficticio.com.br', $data['tomador']['email']);
+        $this->assertStringContainsString('Avenida Paulista', $data['tomador']['endereco']);
+        $this->assertSame('São Paulo / SP', $data['tomador']['municipio']);
+    }
+
+    // ── Serviço ───────────────────────────────────────────────────────────────
+
+    public function test_servico_campos_secundarios(): void
+    {
+        $data = (new \DanfseNacional\Template\DanfseTemplate())
+            ->buildData((new DanfseGenerator())->parseXml($this->realXml));
+
+        $this->assertSame('007', $data['servico']['codigo_trib_municipal']);
+        $this->assertStringContainsString('Niterói', $data['servico']['local_prestacao']);
+        $this->assertStringContainsString('Desenvolvimento de sistema', $data['servico']['descricao']);
+        $this->assertStringContainsString('Desenvolvimento e licenciamento', $data['servico']['desc_trib']);
+    }
+
+    // ── Tributação federal ────────────────────────────────────────────────────
+
+    public function test_tributacao_federal_retencoes(): void
+    {
+        $data = (new \DanfseNacional\Template\DanfseTemplate())
+            ->buildData((new DanfseGenerator())->parseXml($this->realXml));
+
+        $this->assertSame('R$ 22,50', $data['tributacao_federal']['irrf']);
+        $this->assertSame('R$ 15,00', $data['tributacao_federal']['cp']);
+        $this->assertSame('R$ 9,75', $data['tributacao_federal']['pis']);
+        $this->assertSame('R$ 45,00', $data['tributacao_federal']['cofins']);
+    }
+
+    // ── Totais ────────────────────────────────────────────────────────────────
+
+    public function test_totais_descontos_e_retencoes(): void
+    {
+        $data = (new \DanfseNacional\Template\DanfseTemplate())
+            ->buildData((new DanfseGenerator())->parseXml($this->realXml));
+
+        $this->assertSame('R$ 50,00', $data['totais']['desconto_condicionado']);
+        $this->assertSame('R$ 100,00', $data['totais']['desconto_incondicionado']);
+        // IRRF(22,50) + CP(15,00) + CSLL(15,00) = 52,50
+        $this->assertSame('R$ 52,50', $data['totais']['retencoes_federais']);
+    }
+
+    // ── IBS/CBS campos não cobertos ───────────────────────────────────────────
+
+    public function test_ibs_cbs_aliquotas_efetivas(): void
+    {
+        $xml = file_get_contents(__DIR__ . '/../examples/nfse_exemplo_ibscbs.xml');
+        $data = (new \DanfseNacional\Template\DanfseTemplate())
+            ->buildData((new DanfseGenerator())->parseXml($xml));
+
+        $this->assertSame('0.05%', $data['ibs_cbs']['aliq_efetiva_mun']);
+        $this->assertSame('0.10%', $data['ibs_cbs']['aliq_efetiva_uf']);
+        $this->assertSame('0.90%', $data['ibs_cbs']['aliquota_cbs']);
+        $this->assertSame('0.90%', $data['ibs_cbs']['aliq_efetiva_cbs']);
+        // Sem reduções → todos '-' (pctList retorna '-' sem sufixo % em valores vazios)
+        $this->assertSame('- / - / -', $data['ibs_cbs']['red_aliquota']);
+    }
+
+    // ── INFORMAÇÕES COMPLEMENTARES ────────────────────────────────────────────
+
+    public function test_informacoes_complementares_com_xinf_e_ptottrib(): void
+    {
+        $data = (new \DanfseNacional\Template\DanfseTemplate())
+            ->buildData((new DanfseGenerator())->parseXml($this->realXml));
+
+        $ic = $data['informacoes_complementares'];
+
+        $this->assertStringContainsString('Inf. Cont.: Referente ao contrato', $ic);
+        $this->assertStringContainsString(
+            'Totais Aproximados dos Tributos cfe. Lei nº 12.741/2012: Federais: 4.50%; Estaduais: 0.10%; Municipais: 2.00%',
+            $ic,
+        );
+        // Campos ausentes não devem aparecer
+        $this->assertStringNotContainsString('NFS-e Subst.:', $ic);
+        $this->assertStringNotContainsString('Cod. Obra:', $ic);
+    }
+
+    public function test_informacoes_complementares_sem_infocompl_tributos_incompletos(): void
+    {
+        $xml = preg_replace('#\s*<infoCompl>.*?</infoCompl>#s', '', $this->realXml);
+        $xml = preg_replace('#<pTotTrib>.*?</pTotTrib>#s', '<pTotTribSN>13.21</pTotTribSN>', $xml);
+        $data = (new \DanfseNacional\Template\DanfseTemplate())
+            ->buildData((new DanfseGenerator())->parseXml($xml));
+
+        $this->assertSame(
+            'Totais Aproximados dos Tributos cfe. Lei nº 12.741/2012: Federais: -; Estaduais: -; Municipais: -',
+            $data['informacoes_complementares'],
+        );
+    }
+
+    public function test_informacoes_complementares_com_vtottrib_monetario(): void
+    {
+        $xml = preg_replace(
+            '#<pTotTrib>.*?</pTotTrib>#s',
+            '<vTotTrib><vTotTribFed>67.50</vTotTribFed><vTotTribEst>1.50</vTotTribEst><vTotTribMu>30.00</vTotTribMu></vTotTrib>',
+            $this->realXml,
+        );
+
+        $data = (new \DanfseNacional\Template\DanfseTemplate())
+            ->buildData((new DanfseGenerator())->parseXml($xml));
+
+        $this->assertStringContainsString(
+            'Totais Aproximados dos Tributos cfe. Lei nº 12.741/2012: Federais: R$ 67,50; Estaduais: R$ 1,50; Municipais: R$ 30,00',
+            $data['informacoes_complementares'],
+        );
+    }
+
+    public function test_informacoes_complementares_todos_campos_nt008(): void
+    {
+        // Injeta todos os campos opcionais de informações complementares
+        $xml = str_replace(
+            '<infoCompl>' . "\n" . '                        <xInfComp>Referente ao contrato',
+            '<infoCompl>' . "\n" . '                        <xInfComp>Texto livre</xInfComp>'
+                . '<docRef>DOC-2026-001</docRef>'
+                . '<idDocTec>TEC-123</idDocTec>'
+                . '<xPed>PED-456</xPed>'
+                . '<gItemPed><xItemPed>ITEM-789</xItemPed></gItemPed>'
+                . '<xInfCompIgnored>',
+            $this->realXml,
+        );
+        // Injeta subst no infDPS
+        $xml = str_replace(
+            '<tpAmb>1</tpAmb>',
+            '<tpAmb>1</tpAmb><subst><chSubstda>NFSe-CHAVE-SUBSTITUIDA-000001</chSubstda></subst>',
+            $xml,
+        );
+        // Injeta obra no serv
+        $xml = str_replace(
+            '<locPrest>',
+            '<obra><cObra>OBRA-001</cObra></obra><locPrest>',
+            $xml,
+        );
+        // Injeta atvEvento no serv
+        $xml = str_replace(
+            '<cServ>',
+            '<atvEvento><idAtvEvt>EVT-2026-001</idAtvEvt></atvEvento><cServ>',
+            $xml,
+        );
+        // Injeta imovel no IBSCBS da DPS
+        $xml = str_replace(
+            '<IBSCBS>' . "\n" . '                    <finNFSe>',
+            '<IBSCBS>' . "\n" . '                    <imovel><inscImobFisc>IMOB-12345</inscImobFisc></imovel>' . "\n" . '                    <finNFSe>',
+            file_get_contents(__DIR__ . '/../examples/nfse_exemplo_ibscbs.xml'),
+        );
+        // Injeta xOutInf no infNFSe
+        $xml2 = str_replace(
+            '<nNFSe>',
+            '<xOutInf>Texto adicional municipio</xOutInf><nNFSe>',
+            file_get_contents(__DIR__ . '/../examples/nfse_exemplo_ibscbs.xml'),
+        );
+
+        // Testa cada campo individualmente com XMLs limpos de injeção
+        $gen = new DanfseGenerator();
+        $tmpl = new \DanfseNacional\Template\DanfseTemplate();
+
+        // subst/chSubstda
+        $xmlSubst = str_replace(
+            '<tpAmb>1</tpAmb>',
+            '<tpAmb>1</tpAmb><subst><chSubstda>CHAVE-SUBST-001</chSubstda></subst>',
+            $this->realXml,
+        );
+        $ic = $tmpl->buildData($gen->parseXml($xmlSubst))['informacoes_complementares'];
+        $this->assertStringContainsString('NFS-e Subst.: CHAVE-SUBST-001', $ic);
+
+        // serv/obra/cObra
+        $xmlObra = str_replace('<locPrest>', '<obra><cObra>OBRA-2026</cObra></obra><locPrest>', $this->realXml);
+        $ic = $tmpl->buildData($gen->parseXml($xmlObra))['informacoes_complementares'];
+        $this->assertStringContainsString('Cod. Obra: OBRA-2026', $ic);
+
+        // serv/atvEvento/idAtvEvt
+        $xmlEvt = str_replace('<cServ>', '<atvEvento><idAtvEvt>EVT-001</idAtvEvt></atvEvento><cServ>', $this->realXml);
+        $ic = $tmpl->buildData($gen->parseXml($xmlEvt))['informacoes_complementares'];
+        $this->assertStringContainsString('Cod. Evt.: EVT-001', $ic);
+
+        // infoCompl/docRef, idDocTec, xPed, gItemPed/xItemPed
+        $xmlExtra = str_replace(
+            '<xInfComp>',
+            '<docRef>DOC-REF-001</docRef><idDocTec>DOC-TEC-001</idDocTec>'
+                . '<xPed>PED-001</xPed><gItemPed><xItemPed>ITEM-001</xItemPed></gItemPed><xInfComp>',
+            $this->realXml,
+        );
+        $ic = $tmpl->buildData($gen->parseXml($xmlExtra))['informacoes_complementares'];
+        $this->assertStringContainsString('Doc. Ref.: DOC-REF-001', $ic);
+        $this->assertStringContainsString('Doc. Tec.: DOC-TEC-001', $ic);
+        $this->assertStringContainsString('Núm. Ped.: PED-001', $ic);
+        $this->assertStringContainsString('Item Ped.: ITEM-001', $ic);
+
+        // IBSCBS/imovel/inscImobFisc
+        $xmlImovel = str_replace(
+            '<finNFSe>0</finNFSe>',
+            '<finNFSe>0</finNFSe><imovel><inscImobFisc>IMOB-001</inscImobFisc></imovel>',
+            file_get_contents(__DIR__ . '/../examples/nfse_exemplo_ibscbs.xml'),
+        );
+        $ic = $tmpl->buildData($gen->parseXml($xmlImovel))['informacoes_complementares'];
+        $this->assertStringContainsString('Insc. Imob.: IMOB-001', $ic);
+
+        // infNFSe/xOutInf
+        $xmlOutInf = str_replace(
+            '<nNFSe>10</nNFSe>',
+            '<nNFSe>10</nNFSe><xOutInf>Info adicional municipio</xOutInf>',
+            file_get_contents(__DIR__ . '/../examples/nfse_exemplo_ibscbs.xml'),
+        );
+        $ic = $tmpl->buildData($gen->parseXml($xmlOutInf))['informacoes_complementares'];
+        $this->assertStringContainsString('Inf. A. T. Mun.: Info adicional municipio', $ic);
+    }
+
+    public function test_informacoes_complementares_ordem_e_separadores(): void
+    {
+        // Injeta subst + xInfComp para verificar a ordem e o separador " | "
+        $xml = str_replace(
+            '<tpAmb>1</tpAmb>',
+            '<tpAmb>1</tpAmb><subst><chSubstda>CHAVE-999</chSubstda></subst>',
+            $this->realXml,
+        );
+
+        $ic = (new \DanfseNacional\Template\DanfseTemplate())
+            ->buildData((new DanfseGenerator())->parseXml($xml))['informacoes_complementares'];
+
+        // Inf. Cont. deve aparecer antes de NFS-e Subst.
+        $posInf = strpos($ic, 'Inf. Cont.:');
+        $posSubst = strpos($ic, 'NFS-e Subst.:');
+        $posTrib = strpos($ic, 'Totais Aproximados');
+        $this->assertLessThan($posSubst, $posInf, 'Inf. Cont. deve preceder NFS-e Subst.');
+        $this->assertLessThan($posTrib, $posSubst, 'NFS-e Subst. deve preceder linha de tributos');
+
+        // Separador pipe
+        $this->assertStringContainsString(' | ', $ic);
+    }
+
+    public function test_informacoes_complementares_truncamento_2000(): void
+    {
+        // xInfComp com 2100 chars → corpo deve ser truncado em 2000 com "..."
+        $longo = str_repeat('A', 2100);
+        $xml = str_replace(
+            '<xInfComp>Referente',
+            '<xInfComp>' . $longo . 'X',
+            $this->realXml,
+        );
+
+        $ic = (new \DanfseNacional\Template\DanfseTemplate())
+            ->buildData((new DanfseGenerator())->parseXml($xml))['informacoes_complementares'];
+
+        // O corpo (antes do tributos) deve estar truncado
+        $this->assertStringContainsString('...', $ic);
+        // A linha de tributos sempre aparece, mesmo após truncamento
+        $this->assertStringContainsString('Totais Aproximados dos Tributos', $ic);
+    }
+
+    // ── HTML: blocos condicionais e renderização ──────────────────────────────
+
+    public function test_html_watermark_cancelada(): void
+    {
+        $config = new DanfseConfig(canceled: true);
+        $html = (new DanfseGenerator($config))->generateHtml(
+            (new DanfseGenerator())->parseXml($this->realXml)
+        );
+
+        $this->assertStringContainsString('class="watermark"', $html);
+        $this->assertStringContainsString('CANCELADA', $html);
+    }
+
+    public function test_html_watermark_substituida(): void
+    {
+        $config = new DanfseConfig(substituted: true);
+        $html = (new DanfseGenerator($config))->generateHtml(
+            (new DanfseGenerator())->parseXml($this->realXml)
+        );
+
+        $this->assertStringContainsString('class="watermark"', $html);
+        $this->assertStringContainsString('SUBSTITUÍDA', $html);
+    }
+
+    public function test_html_sem_watermark_em_nota_normal(): void
+    {
+        $html = (new DanfseGenerator())->generateHtml(
+            (new DanfseGenerator())->parseXml($this->realXml)
+        );
+
+        $this->assertStringNotContainsString('class="watermark"', $html);
+    }
+
+    public function test_html_homologacao_exibe_aviso_sem_validade(): void
+    {
+        $xml = str_replace('<tpAmb>1</tpAmb>', '<tpAmb>2</tpAmb>', $this->realXml);
+        $html = (new DanfseGenerator())->generateHtml(
+            (new DanfseGenerator())->parseXml($xml)
+        );
+
+        $this->assertStringContainsString('NFS-e SEM VALIDADE JURÍDICA', $html);
+        $this->assertStringContainsString('Homologação', $html);
+    }
+
+    public function test_html_producao_nao_exibe_aviso_sem_validade(): void
+    {
+        $html = (new DanfseGenerator())->generateHtml(
+            (new DanfseGenerator())->parseXml($this->realXml)
+        );
+
+        $this->assertStringNotContainsString('NFS-e SEM VALIDADE JURÍDICA', $html);
+        $this->assertStringContainsString('Produção', $html);
+    }
+
+    public function test_html_destinatario_identificado_renderiza_bloco(): void
+    {
+        $xml = file_get_contents(__DIR__ . '/../examples/nfse_exemplo_ibscbs.xml');
+        $html = (new DanfseGenerator())->generateHtml(
+            (new DanfseGenerator())->parseXml($xml)
+        );
+
+        $this->assertStringContainsString('DESTINATÁRIO DA OPERAÇÃO</span>', $html);
+        $this->assertStringContainsString('DESTINATARIO FINAL SERVICOS LTDA', $html);
+        $this->assertStringNotContainsString('DESTINATÁRIO DA OPERAÇÃO NÃO IDENTIFICADO', $html);
+    }
+
+    public function test_html_destinatario_nao_identificado_exibe_mensagem(): void
+    {
+        // realXml não tem IBS/CBS → destinatário não identificado
+        $html = (new DanfseGenerator())->generateHtml(
+            (new DanfseGenerator())->parseXml($this->realXml)
+        );
+
+        $this->assertStringContainsString('DESTINATÁRIO DA OPERAÇÃO NÃO IDENTIFICADO NA NFS-e', $html);
+        $this->assertStringNotContainsString('DESTINATÁRIO DA OPERAÇÃO</span>', $html);
+    }
+
+    public function test_html_destinatario_proprio_tomador_exibe_mensagem(): void
+    {
+        $xml = str_replace(
+            '<indDest>1</indDest>',
+            '<indDest>0</indDest>',
+            file_get_contents(__DIR__ . '/../examples/nfse_exemplo_ibscbs.xml'),
+        );
+        $html = (new DanfseGenerator())->generateHtml(
+            (new DanfseGenerator())->parseXml($xml)
+        );
+
+        $this->assertStringContainsString('O DESTINATÁRIO É O PRÓPRIO TOMADOR/ADQUIRENTE DA OPERAÇÃO', $html);
+        $this->assertStringNotContainsString('DESTINATÁRIO DA OPERAÇÃO</span>', $html);
+    }
+
+    public function test_html_intermediario_renderiza_quando_presente(): void
+    {
+        $xml = file_get_contents(__DIR__ . '/../examples/nfse_exemplo_ibscbs.xml');
+        $html = (new DanfseGenerator())->generateHtml(
+            (new DanfseGenerator())->parseXml($xml)
+        );
+
+        $this->assertStringContainsString('INTERMEDIÁRIO DA OPERAÇÃO', $html);
+        $this->assertStringContainsString('INTERMEDIARIO FICTICIO LTDA', $html);
+    }
+
+    public function test_html_intermediario_ausente_quando_nao_informado(): void
+    {
+        $xml = preg_replace('#\s*<interm>.*?</interm>#s', '', $this->realXml);
+        $html = (new DanfseGenerator())->generateHtml(
+            (new DanfseGenerator())->parseXml($xml)
+        );
+
+        $this->assertStringNotContainsString('INTERMEDIÁRIO DA OPERAÇÃO', $html);
+    }
+
+    public function test_html_bloco_ibscbs_renderiza_quando_presente(): void
+    {
+        $xml = file_get_contents(__DIR__ . '/../examples/nfse_exemplo_ibscbs.xml');
+        $html = (new DanfseGenerator())->generateHtml(
+            (new DanfseGenerator())->parseXml($xml)
+        );
+
+        $this->assertStringContainsString('TRIBUTAÇÃO IBS / CBS', $html);
+        $this->assertStringContainsString('R$ 1.500,00', $html); // BC
+    }
+
+    public function test_html_bloco_ibscbs_ausente_quando_nao_informado(): void
+    {
+        // realXml não tem IBS/CBS
+        $html = (new DanfseGenerator())->generateHtml(
+            (new DanfseGenerator())->parseXml($this->realXml)
+        );
+
+        $this->assertStringNotContainsString('TRIBUTAÇÃO IBS/CBS', $html);
+    }
+
+    public function test_html_informacoes_complementares_renderizadas(): void
+    {
+        $html = (new DanfseGenerator())->generateHtml(
+            (new DanfseGenerator())->parseXml($this->realXml)
+        );
+
+        $this->assertStringContainsString('INFORMAÇÕES COMPLEMENTARES', $html);
+        $this->assertStringContainsString('Inf. Cont.:', $html);
+        $this->assertStringContainsString('Totais Aproximados dos Tributos', $html);
     }
 }
