@@ -8,11 +8,16 @@ use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 use DanfseNacional\Config\DanfseConfig;
 use DanfseNacional\Dto\Endereco;
+use DanfseNacional\Dto\EnderecoNacional;
+use DanfseNacional\Dto\InfNFSe;
 use DanfseNacional\Dto\NFSe;
 use DanfseNacional\Dto\RtcIBSCBS;
 use DanfseNacional\Dto\RtcIBSCBSNFSe;
 use DanfseNacional\Dto\SitClasIbsCbs;
+use DanfseNacional\Dto\InfDPS;
+use DanfseNacional\Dto\Servico;
 use DanfseNacional\Dto\TotCIbs;
+use DanfseNacional\Dto\TotTrib;
 use DanfseNacional\Dto\TribFederal;
 use DanfseNacional\Dto\TribMunicipal;
 use DanfseNacional\Dto\ValoresIbsCbs;
@@ -52,6 +57,7 @@ class DanfseTemplate
         $data = $this->buildData($nfse);
         $logo = $config->logoDataUri;
         $municipality = $config->municipality;
+        $watermark = $config->canceled ? 'CANCELADA' : ($config->substituted ? 'SUBSTITUÍDA' : null);
         $qrCode = $this->generateQrCode($data['chave_acesso']);
         array_walk_recursive($data, fn(&$v) => $v = is_string($v) ? htmlspecialchars($v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : $v);
 
@@ -100,8 +106,18 @@ class DanfseTemplate
         $chaveAcesso = str_starts_with($id, 'NFS') ? substr($id, 3) : $id;
 
         // Bloco PRESTADOR/FORNECEDOR (NT-008 2.1.3): dados lidos exclusivamente
-        // do nó prest (infDPS/prest). A NT-008 não prevê o nó emit como fonte.
-        $prestEnd = $prest?->end;
+        // do nó prest (infDPS/prest). A NT-008 não prevê o nó emit como fonte,
+        // mas usamos como fallback quando tpEmit = 1 para que a seção não fique vazia
+        $enderNacEmit = $infDps?->tpEmit == 1 ? $inf?->emit->enderNac : null;
+        $prestEnd = $prest?->end ?? ($enderNacEmit !== null
+            ? new Endereco(
+                endNac: new EnderecoNacional($enderNacEmit->cMun, $enderNacEmit->CEP),
+                xLgr: $enderNacEmit->xLgr,
+                nro: $enderNacEmit->nro,
+                xCpl: $enderNacEmit->xCpl,
+                xBairro: $enderNacEmit->xBairro,
+            )
+            : null);
 
         $endDest = $dest?->end;
 
@@ -154,16 +170,16 @@ class DanfseTemplate
             'finalidade' => $finNFSe !== '' ? FinNFSe::labelFor($finNFSe) : '',
 
             'prestador' => [
-                'nome' => $prest?->xNome ?: '-',
+                'nome' => $prest?->xNome ?: $inf?->emit?->xNome ?: '-',
                 'cnpj_cpf' => $this->fmt->cnpjCpf($prest?->documento() ?? ''),
-                'im' => $prest?->IM ?: '-',
+                'im' => $prest?->IM ?: $inf?->emit?->IM ?: '-',
                 'telefone' => $this->fmt->phone($prest?->fone ?? ''),
                 'email' => strtolower($prest?->email ?? ''),
                 'endereco' => $this->enderecoLinha($prestEnd) ?: '-',
                 'municipio' => $this->municipioUf($prestEnd) ?: '-',
                 'codigo_ibge_cep' => $this->ibgeCepFrom($prestEnd) ?: '-',
-                'simples_nacional' => OpSimpNac::labelFor($regTrib?->opSimpNac ?? ''),
-                'regime_sn' => RegApTribSN::labelFor($regTrib?->regApTribSN ?? ''),
+                'simples_nacional' => $this->fmt->limit(OpSimpNac::labelFor($regTrib?->opSimpNac ?? ''), 40),
+                'regime_sn' => $this->fmt->limit(RegApTribSN::labelFor($regTrib?->regApTribSN ?? ''), 80),
             ],
 
             'tomador' => [
@@ -194,33 +210,34 @@ class DanfseTemplate
 
             'servico' => [
                 'codigo_trib_nacional' => $this->fmt->codTribNacional($cServ?->cTribNac ?? ''),
-                'desc_trib_nacional' => $this->fmt->limit(trim($inf?->xTribNac ?? ''), 60),
                 'codigo_trib_municipal' => $cServ?->cTribMun ?? '-',
-                'desc_trib_municipal' => $this->fmt->limit(trim($inf?->xTribMun ?? ''), 60),
-                'codigo_nbs' => $cServ?->cNBS ?: '-',
-                'local_prestacao' => $inf?->xLocPrestacao ?? '-',
-                'pais_prestacao' => $locPrest?->cPaisPrestacao ?? '-',
+                'desc_trib' => $this->fmt->limit(!empty($inf?->xTribMun) ? $inf?->xTribMun : $inf?->xTribNac, 170),
+                'codigo_nbs' => $this->fmt->codigoNbs($cServ?->cNBS ?: '-'),
+                'local_prestacao' => (Municipios::lookup($locPrest->cLocPrestacao) ?: '-') . ' / ' . ($locPrest?->cPaisPrestacao ?? '-'),
                 'descricao' => $cServ?->xDescServ ?? '-',
             ],
 
             'tributacao_municipal' => [
+                // Linha 1  ──────────
                 'tributacao_issqn' => TribISSQN::labelFor($tribMun?->tribISSQN ?? ''),
-                'pais_resultado' => $tribMun?->cPaisResult ?: '-',
-                'municipio_incidencia' => $inf?->xLocIncid ?? '-',
+                'municipio_incidencia' => (Municipios::lookup($inf?->cLocIncid) ?: '-') . ' / ' . ($tribMun?->cPaisResult ?: '-'),
+                // Linha 2  ──────────
                 'regime_especial' => RegEspTrib::labelFor($regTrib?->regEspTrib ?? ''),
                 'tipo_imunidade' => ($tribMun?->tpImunidade ?? '') !== ''
                     ? TpImunidade::labelFor($tribMun->tpImunidade)
-                    : '-',
+                    : '',
                 'suspensao_exigibilidade' => $tribMun?->exigSusp
                     ? TpExigSusp::labelFor($tribMun->exigSusp->tpSusp)
-                    : 'Não',
-                'num_processo_suspensao' => $tribMun?->exigSusp?->nProcesso ?: '-',
+                    : '',
+                'num_processo_suspensao' => $tribMun?->exigSusp?->nProcesso ?: '',
+                // Linha 3  ──────────
                 'beneficio_municipal' => ($valoresNfse?->tpBM ?? '') !== ''
                     ? TpBM::labelFor($valoresNfse->tpBM)
-                    : '-',
+                    : '',
                 'calculo_bm' => $this->firstCurrency($valoresNfse?->vCalcBM ?? '', $tribMun?->BM?->vRedBCBM ?? ''),
                 'total_deducoes' => $this->firstCurrency($valoresNfse?->vCalcDR ?? '', $tribMun?->vDeducao ?? ''),
-                'desconto_incondicionado' => $tribMun?->vDescIncond ? $this->fmt->currency($tribMun->vDescIncond) : '-',
+                'desconto_incondicionado' => $tribMun?->vDescIncond ? $this->fmt->currency($tribMun->vDescIncond) : '',
+                // Linha 4  ──────────
                 'valor_servico' => $this->fmt->currency($vServPrest?->vServ ?? ''),
                 'bc_issqn' => $tribMun?->vBC ? $this->fmt->currency($tribMun->vBC) : '-',
                 'aliquota' => $tribMun?->pAliq ? $tribMun->pAliq . '%' : '-',
@@ -232,11 +249,11 @@ class DanfseTemplate
                 'irrf' => $tribFed?->vRetIRRF ? $this->fmt->currency($tribFed->vRetIRRF) : '-',
                 'cp' => $tribFed?->vRetCP ? $this->fmt->currency($tribFed->vRetCP) : '-',
                 'contrib_sociais' => $tribFed?->vRetCSLL ? $this->fmt->currency($tribFed->vRetCSLL) : '-',
+                'pis' => $tribFed?->piscofins?->vPis ? $this->fmt->currency($tribFed->piscofins->vPis) : '-',
+                'cofins' => $tribFed?->piscofins?->vCofins ? $this->fmt->currency($tribFed->piscofins->vCofins) : '-',
                 'desc_contrib_sociais' => ($tribFed?->piscofins?->tpRetPisCofins ?? '') !== ''
                     ? TpRetPisCofins::labelFor($tribFed->piscofins->tpRetPisCofins)
                     : '-',
-                'pis' => $tribFed?->piscofins?->vPis ? $this->fmt->currency($tribFed->piscofins->vPis) : '-',
-                'cofins' => $tribFed?->piscofins?->vCofins ? $this->fmt->currency($tribFed->piscofins->vCofins) : '-',
                 // Nota 6: visível apenas para competência até o fim de 2026.
                 'mostrar_pis_cofins' => $mostrarPisCofins,
             ],
@@ -245,17 +262,10 @@ class DanfseTemplate
                 'valor_servico' => $this->fmt->currency($vServPrest?->vServ ?? ''),
                 'desconto_condicionado' => $tribMun?->vDescCond ? $this->fmt->currency($tribMun->vDescCond) : '-',
                 'desconto_incondicionado' => $tribMun?->vDescIncond ? $this->fmt->currency($tribMun->vDescIncond) : '-',
-                'issqn_retido' => ($tribMun?->vISSQN && ($tribMun?->tpRetISSQN ?? '1') !== '1')
-                    ? $this->fmt->currency($tribMun->vISSQN)
-                    : '-',
                 'retencoes_federais' => $this->sumCurrency(
                     $tribFed?->vRetIRRF ?? '',
                     $tribFed?->vRetCP ?? '',
                     $tribFed?->vRetCSLL ?? '',
-                ),
-                'pis_cofins' => $this->sumCurrency(
-                    $tribFed?->piscofins?->vPis ?? '',
-                    $tribFed?->piscofins?->vCofins ?? '',
                 ),
                 'valor_liquido' => $this->fmt->currency($valoresNfse?->vLiq ?? ''),
                 'total_ibs_cbs' => $this->sumCurrency(
@@ -267,14 +277,94 @@ class DanfseTemplate
                     : '-',
             ],
 
-            'totais_tributos' => [
-                'federais' => $totTrib?->pTotTrib?->pTotTribFed ? $totTrib->pTotTrib->pTotTribFed . '%' : '-',
-                'estaduais' => $totTrib?->pTotTrib?->pTotTribEst ? $totTrib->pTotTrib->pTotTribEst . '%' : '-',
-                'municipais' => $totTrib?->pTotTrib?->pTotTribMun ? $totTrib->pTotTrib->pTotTribMun . '%' : '-',
-            ],
-
-            'informacoes_complementares' => $serv?->infoCompl?->xInfComp ?? '',
+            'informacoes_complementares' => $this->buildInfoComplementares(
+                $serv,
+                $infDps,
+                $ibsCbsDps,
+                $inf,
+                $totTrib,
+            ),
         ];
+    }
+
+    /**
+     * Monta a string do campo INFORMAÇÕES COMPLEMENTARES conforme NT-008.
+     * Ordem e rótulos definidos pela norma; separador: " | ".
+     * Corpo limitado a 2000 chars (Formatter::limit); linha de tributos é fixa.
+     */
+    private function buildInfoComplementares(
+        ?Servico $serv,
+        ?InfDPS $infDps,
+        ?RtcIBSCBS $ibsCbsDps,
+        ?InfNFSe $inf,
+        ?TotTrib $totTrib,
+    ): string {
+        $infoCompl = $serv?->infoCompl;
+
+        $parts = [];
+
+        if (($infoCompl?->xInfComp ?? '') !== '') {
+            $parts[] = 'Inf. Cont.: ' . $infoCompl->xInfComp;
+        }
+        if (($infDps?->subst?->chSubstda ?? '') !== '') {
+            $parts[] = 'NFS-e Subst.: ' . $infDps->subst->chSubstda;
+        }
+        if (($infoCompl?->docRef ?? '') !== '') {
+            $parts[] = 'Doc. Ref.: ' . $infoCompl->docRef;
+        }
+        if (($serv?->obra?->cObra ?? '') !== '') {
+            $parts[] = 'Cod. Obra: ' . $serv->obra->cObra;
+        }
+        if (($ibsCbsDps?->imovel?->inscImobFisc ?? '') !== '') {
+            $parts[] = 'Insc. Imob.: ' . $ibsCbsDps->imovel->inscImobFisc;
+        }
+        if (($serv?->atvEvento?->idAtvEvt ?? '') !== '') {
+            $parts[] = 'Cod. Evt.: ' . $serv->atvEvento->idAtvEvt;
+        }
+        if (($infoCompl?->idDocTec ?? '') !== '') {
+            $parts[] = 'Doc. Tec.: ' . $infoCompl->idDocTec;
+        }
+        if (($infoCompl?->xPed ?? '') !== '') {
+            $parts[] = 'Núm. Ped.: ' . $infoCompl->xPed;
+        }
+        if (($infoCompl?->gItemPed?->xItemPed ?? '') !== '') {
+            $parts[] = 'Item Ped.: ' . $infoCompl->gItemPed->xItemPed;
+        }
+        if (($inf?->xOutInf ?? '') !== '') {
+            $parts[] = 'Inf. A. T. Mun.: ' . $inf->xOutInf;
+        }
+
+        $body = $this->fmt->limit(implode(' | ', $parts), 2000);
+        $tribLine = $this->buildTribLine($totTrib);
+
+        return $body !== '' ? $body . ' | ' . $tribLine : $tribLine;
+    }
+
+    /**
+     * Formata a linha obrigatória de Totais Aproximados dos Tributos (Nota 10).
+     * Usa valores monetários (vTotTrib) se disponíveis; senão percentuais (pTotTrib).
+     */
+    private function buildTribLine(?TotTrib $totTrib): string
+    {
+        $prefix = 'Totais Aproximados dos Tributos cfe. Lei nº 12.741/2012: ';
+
+        $v = $totTrib?->vTotTrib;
+        if ($v !== null && ($v->vTotTribFed !== '' || $v->vTotTribEst !== '' || $v->vTotTribMu !== '')) {
+            $fed = $v->vTotTribFed !== '' ? $this->fmt->currency($v->vTotTribFed) : '-';
+            $est = $v->vTotTribEst !== '' ? $this->fmt->currency($v->vTotTribEst) : '-';
+            $mun = $v->vTotTribMu !== '' ? $this->fmt->currency($v->vTotTribMu) : '-';
+            return $prefix . "Federais: {$fed}; Estaduais: {$est}; Municipais: {$mun}";
+        }
+
+        $p = $totTrib?->pTotTrib;
+        if ($p !== null && ($p->pTotTribFed !== '' || $p->pTotTribEst !== '' || $p->pTotTribMun !== '')) {
+            $fed = $p->pTotTribFed !== '' ? $p->pTotTribFed . '%' : '-';
+            $est = $p->pTotTribEst !== '' ? $p->pTotTribEst . '%' : '-';
+            $mun = $p->pTotTribMun !== '' ? $p->pTotTribMun . '%' : '-';
+            return $prefix . "Federais: {$fed}; Estaduais: {$est}; Municipais: {$mun}";
+        }
+
+        return $prefix . 'Federais: -; Estaduais: -; Municipais: -';
     }
 
     /**
@@ -304,7 +394,7 @@ class DanfseTemplate
         $indicador = implode(' / ', array_filter([
             $dps?->cIndOp ?? '',
             $nfse?->cLocalidadeIncid ?? '',
-            $nfse?->xLocalidadeIncid ?? '',
+            Municipios::lookup($nfse?->cLocalidadeIncid) ?? '',
         ], fn($v) => $v !== '')) ?: '-';
 
         return [
@@ -359,9 +449,12 @@ class DanfseTemplate
         if ($e === null) {
             return '';
         }
-        return implode(', ', array_filter([
+
+        $line = implode(', ', array_filter([
             $e->xLgr, $e->nro, $e->xCpl, $e->xBairro,
         ], fn($v) => $v !== ''));
+
+        return $this->fmt->limit($line, 80);
     }
 
     /**
@@ -370,15 +463,17 @@ class DanfseTemplate
      */
     private function municipioUf(?Endereco $e): string
     {
+        $line = '';
+
         if (($e?->endNac?->cMun ?? '') !== '') {
-            return Municipios::lookup($e->endNac->cMun);
-        }
-        if ($e?->endExt !== null) {
-            return implode(' / ', array_filter([
+            $line = Municipios::lookup($e->endNac->cMun);
+        } elseif ($e?->endExt !== null) {
+            $line = implode(' / ', array_filter([
                 $e->endExt->xCidade, $e->endExt->xEstProvReg,
             ], fn($v) => $v !== ''));
         }
-        return '';
+
+        return $this->fmt->limit($line, 37);
     }
 
     /**
@@ -386,13 +481,15 @@ class DanfseTemplate
      */
     private function ibgeCepFrom(?Endereco $e): string
     {
+        $line = '';
+
         if ($e?->endNac !== null) {
-            return $this->ibgeCep($e->endNac->cMun, $e->endNac->CEP);
+            $line = $this->ibgeCep($e->endNac->cMun, $e->endNac->CEP);
+        } elseif ($e?->endExt !== null) {
+            $line = $e->endExt->cEndPost;
         }
-        if ($e?->endExt !== null) {
-            return $e->endExt->cEndPost;
-        }
-        return '';
+
+        return $this->fmt->limit($line, 21);
     }
 
     /**
@@ -413,7 +510,7 @@ class DanfseTemplate
     }
 
     /**
-     * Retorna o primeiro valor monetário não vazio já formatado, ou '-' se todos vazios.
+     * Retorna o primeiro valor monetário não vazio já formatado, ou '-' se todos estiverem vazios.
      */
     private function firstCurrency(string ...$values): string
     {
@@ -426,7 +523,7 @@ class DanfseTemplate
     }
 
     /**
-     * Soma valores monetários e retorna formatado, ou '-' se todos forem vazios.
+     * Soma valores monetários e retorna formatado, ou '-' se todos estiverem vazios.
      */
     private function sumCurrency(string ...$values): string
     {

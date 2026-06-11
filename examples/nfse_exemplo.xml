@@ -122,6 +122,7 @@
                             <vISSQN>27.00</vISSQN>
                             <vDescCond>50.00</vDescCond>
                             <vDescIncond>100.00</vDescIncond>
+                            <cPaisResult>BR</cPaisResult>
                         </tribMun>
                         <tribFed>
                             <piscofins>

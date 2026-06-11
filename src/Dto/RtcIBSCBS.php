@@ -13,5 +13,6 @@ readonly class RtcIBSCBS
         public string $indDest = '',
         public ?Destinatario $dest = null,
         public ?InfoValoresIbsCbs $valores = null,
+        public ?Imovel $imovel = null,
     ) {}
 }

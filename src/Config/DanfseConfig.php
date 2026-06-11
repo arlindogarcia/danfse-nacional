@@ -14,6 +14,8 @@ readonly class DanfseConfig
         ?string $logoDataUri = null,
         string|false|null $logoPath = null,
         public ?MunicipalityBranding $municipality = null,
+        public bool $canceled = false,
+        public bool $substituted = false,
     ) {
         if ($logoPath === false) {
             $this->logoDataUri = null;

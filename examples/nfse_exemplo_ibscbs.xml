@@ -96,6 +96,7 @@
                     <regTrib>
                         <opSimpNac>1</opSimpNac>
                         <regEspTrib>6</regEspTrib>
+                        <regApTribSN>2</regApTribSN>
                     </regTrib>
                 </prest>
                 <toma>
@@ -133,6 +134,7 @@
                 <serv>
                     <locPrest>
                         <cLocPrestacao>3303302</cLocPrestacao>
+                        <cPaisPrestacao>BR</cPaisPrestacao>
                     </locPrest>
                     <cServ>
                         <cTribNac>010700</cTribNac>
@@ -157,6 +159,7 @@
                             <vISSQN>27.00</vISSQN>
                             <vDescCond>50.00</vDescCond>
                             <vDescIncond>100.00</vDescIncond>
+                            <cPaisResult>BR</cPaisResult>
                         </tribMun>
                         <tribFed>
                             <piscofins>
