@@ -4,9 +4,9 @@ Biblioteca PHP para geração de PDF do DANFSe (Documento Auxiliar da Nota Fisca
 
 A biblioteca recebe o XML de uma NFS-e autorizada e devolve o conteúdo binário de um PDF em A4 retrato, sem nenhuma dependência de framework. Pode ser usada em projetos Laravel, Symfony, ou em scripts PHP puro.
 
-O objetivo principal desta biblioteca é criar um documento o mais fiel possível ao DANFSe original gerado pela API da SEFAZ, com apenas alguns ajustes para melhorar a legibilidade.
+O layout segue as exigências da **NT 008 (DANFSe v2.0)**: todos os campos são exibidos na mesma ordem definida pela norma e formatados conforme suas regras. Em vez de reproduzir coordenadas fixas, o documento adota um layout fluido — o que o torna adaptável a diferentes volumes de conteúdo sem perda de legibilidade.
 
-Nas NFS-e do ambiente de Homologação, o PDF apresenta a mesma mensagem do documento original, "NFS-e SEM VALIDADE JURÍDICA", além de uma marca d’água adicional para diferenciar os PDFs de teste dos emitidos em Produção. 
+Nas NFS-e do ambiente de Homologação, o PDF exibe a mensagem "NFS-e SEM VALIDADE JURÍDICA", conforme previsto na norma. Para notas canceladas ou substituídas, é possível exibir uma marca d’água correspondente — veja a seção [Marca d’água](#marca-dágua) abaixo.
 
 ## Exemplos
 
@@ -15,7 +15,7 @@ Nas NFS-e do ambiente de Homologação, o PDF apresenta a mesma mensagem do docu
 
 ## Requisitos
 
-PHP 8.1 ou superior com as extensões `simplexml`, `mbstring` e `fileinfo` habilitadas.
+PHP >= 8.2 com as extensões `simplexml`, `mbstring` e `fileinfo` habilitadas.
 
 ## Instalação
 
@@ -87,6 +87,20 @@ $generator = new DanfseGenerator($config);
 $pdf = $generator->generateFromXml($xml);
 ```
 
+## Marca d'água
+
+Para notas canceladas ou substituídas, configure as flags correspondentes em `DanfseConfig`. O PDF exibirá uma marca d'água "CANCELADA" ou "SUBSTITUÍDA" em diagonal sobre o documento.
+
+```php
+// Nota cancelada
+$config = new DanfseConfig(canceled: true);
+$pdf = (new DanfseGenerator($config))->generateFromXml($xml);
+
+// Nota substituída
+$config = new DanfseConfig(substituted: true);
+$pdf = (new DanfseGenerator($config))->generateFromXml($xml);
+```
+
 ## Geração em dois passos
 
 É possível acessar o método `parseXml()` para obter um objeto `DanfseNacional\Dto\NFSe` com os dados da NFS-e antes de gerar o PDF.
@@ -143,30 +157,58 @@ O método `parseXml()` retorna um objeto `DanfseNacional\Dto\NFSe` com proprieda
 
 ```
 NFSe
-└── InfNFSe
+└── infNFSe (InfNFSe)
     ├── emit (Emitente)
     │   └── enderNac (EnderecoEmitente)
     ├── valores (ValoresNFSe)
+    ├── IBSCBS (RtcIBSCBSNFSe)
+    │   ├── valores (ValoresIbsCbs)
+    │   └── totCIBS (TotCIbs)
+    │       ├── gIBS (TotIbs)
+    │       │   ├── gIBSMun (TotIbsMun)
+    │       │   └── gIBSUF (TotIbsUf)
+    │       └── gCBS (TotCbs)
     └── DPS (Dps)
         └── infDPS (InfDPS)
             ├── prest (Prestador)
+            │   ├── end (Endereco)
+            │   │   ├── endNac (EnderecoNacional)
+            │   │   └── endExt (EnderecoExt)
             │   └── regTrib (RegTrib)
             ├── toma (Tomador)
             │   └── end (Endereco)
-            │       └── endNac (EnderecoNacional)
+            │       ├── endNac (EnderecoNacional)
+            │       └── endExt (EnderecoExt)
             ├── interm (Intermediario)
             │   └── end (Endereco)
+            │       ├── endNac (EnderecoNacional)
+            │       └── endExt (EnderecoExt)
             ├── serv (Servico)
             │   ├── locPrest (LocPrest)
-            │   └── cServ (CServ)
-            └── valores (Valores)
-                ├── vServPrest (VServPrest)
-                └── trib (Tributacao)
-                    ├── tribMun (TribMunicipal)
-                    ├── tribFed (TribFederal)
-                    │   └── piscofins (PisCofins)
-                    └── totTrib (TotTrib)
-                        └── pTotTrib (TotTribPercent)
+            │   ├── cServ (CServ)
+            │   ├── infoCompl (InfoCompl)
+            │   │   └── gItemPed (GItemPed)
+            │   ├── obra (Obra)
+            │   └── atvEvento (AtvEvento)
+            ├── valores (Valores)
+            │   ├── vServPrest (VServPrest)
+            │   └── trib (Tributacao)
+            │       ├── tribMun (TribMunicipal)
+            │       │   ├── exigSusp (ExigSuspensa)
+            │       │   └── BM (BeneficioMunicipal)
+            │       ├── tribFed (TribFederal)
+            │       │   └── piscofins (PisCofins)
+            │       └── totTrib (TotTrib)
+            │           ├── vTotTrib (TotTribValue)
+            │           └── pTotTrib (TotTribPercent)
+            ├── IBSCBS (RtcIBSCBS)
+            │   ├── dest (Destinatario)
+            │   │   └── end (Endereco)
+            │   ├── valores (InfoValoresIbsCbs)
+            │   │   └── trib (TribIbsCbs)
+            │   │       └── gIBSCBS (SitClasIbsCbs)
+            │   └── imovel (Imovel)
+            └── subst (Subst)
 ```
 
 Todos os campos opcionais no esquema da NFS-e são representados como propriedades `nullable` ou com valor padrão de string vazia, portanto o acesso nunca lança exceções por campo ausente.
