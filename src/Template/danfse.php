@@ -2,7 +2,6 @@
 /** @var array $data */
 /** @var string $logo */
 /** @var string $qrCode */
-/** @var \DanfseNacional\Config\MunicipalityBranding $municipality */
 /** @var string|null $watermark */
 
 $tm = $data['tributacao_municipal'] ?? null;
@@ -59,8 +58,16 @@ $tm = $data['tributacao_municipal'] ?? null;
             border-bottom: none;
         }
 
+        .first-section {
+            position: relative;
+        }
+
         .first-section table td {
             padding-bottom: 0 !important;
+        }
+
+        .first-section .main-label {
+            padding-bottom: 4px !important;
         }
 
         .main-label {
@@ -102,6 +109,7 @@ $tm = $data['tributacao_municipal'] ?? null;
         .header-table td {
             border: none;
             padding-bottom: 1pt !important;
+            background-color: #f2f2f2;
         }
 
         .logo-cell {
@@ -124,10 +132,7 @@ $tm = $data['tributacao_municipal'] ?? null;
 
         .qr-container {
             text-align: center;
-            /*padding: 3pt;*/
             position: absolute;
-            right: 0;
-            top: 0;
         }
 
         /* Watermark para nota cancelada/substituída */
@@ -165,27 +170,18 @@ $tm = $data['tributacao_municipal'] ?? null;
                 <?php endif; ?>
             </td>
             <td class="municipality-cell">
-                <?php if ($municipality): ?>
+                <?php if ($data['mostrar_municipio']): ?>
                 <table>
                     <tr>
-                        <?php if ($municipality->logoDataUri): ?>
-                        <td><img style="height: 30pt; width: auto" src="<?= htmlspecialchars($municipality->logoDataUri) ?>" alt="Prefeitura" /></td>
-                        <?php endif; ?>
                         <td style="font-size: 8pt; padding: 0">
-                            <?= htmlspecialchars($municipality->name) ?><br>
-                            <?php if ($municipality->department): ?>
-                            <?= htmlspecialchars($municipality->department) ?><br>
-                            <?php endif; ?>
-                            <?php if ($municipality->email): ?>
-                            <?= htmlspecialchars($municipality->email) ?>
-                            <?php endif; ?>
+                            Município: <?= $data['municipio_emissor']['nome'] ?> / <?= $data['municipio_emissor']['uf'] ?>
                         </td>
                     </tr>
                 </table>
                 <?php endif; ?>
                 <div style="font-size: 6pt; padding-top: 1pt;">
                     Ambiente Gerador: <?= $data['amb_gerador'] ?><br>
-                    Tipo de Ambiente: <?= $data['ambiente'] == 2 ? 'Homologação' : 'Produção' ?>
+                    Tipo de Ambiente: <?= $data['ambiente'] ?>
                 </div>
             </td>
         </tr>
@@ -193,17 +189,19 @@ $tm = $data['tributacao_municipal'] ?? null;
 
     <!-- Grade de Identificação -->
     <div class="bordered-section first-section">
-        <table style="min-height: 110px;">
+        <table>
             <tr>
                 <td colspan="3">
                     <span class="label">CHAVE DE ACESSO DA NFS-E</span>
                     <span class="value"><?= $data['chave_acesso'] ?></span>
                 </td>
-                <td style="width: 25%; position: relative;" rowspan="3">
+                <td style="width: 25%;" rowspan="3">
                     <div class="qr-container">
-                        <img src="<?= htmlspecialchars($qrCode) ?>" alt="QR Code" style="width: 70px; height: 70px; display: block; margin: 0 auto;" />
+                        <img src="<?= htmlspecialchars($qrCode) ?>" alt="QR Code"
+                             style="width: 60px; height: 60px; display: block; margin: 0 auto;"/>
                         <div style="font-size: 6pt; padding-top: 2pt; text-align: left;">
-                            A autenticidade desta NFS-e pode ser verificada pela leitura deste código QR ou pela consulta da chave de acesso no portal nacional da NFS-e
+                            A autenticidade desta NFS-e pode ser verificada pela leitura deste código QR ou pela
+                            consulta da chave de acesso no portal nacional da NFS-e
                         </div>
                     </div>
                 </td>

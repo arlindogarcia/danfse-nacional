@@ -16,7 +16,7 @@ use Dompdf\Options;
  *   $pdf = (new DanfseGenerator())->generateFromXml($xmlString);
  *
  * Com configuração:
- *   $generator = new DanfseGenerator(new DanfseConfig(logoDataUri: '...'));
+ *   $generator = new DanfseGenerator(new DanfseConfig(canceled: true));
  *   $pdf = $generator->generateFromXml($xmlString);
  */
 class DanfseGenerator

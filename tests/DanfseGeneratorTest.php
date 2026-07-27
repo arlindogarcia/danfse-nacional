@@ -3,9 +3,9 @@
 namespace DanfseNacional\Tests;
 
 use DanfseNacional\Config\DanfseConfig;
-use DanfseNacional\Config\MunicipalityBranding;
 use DanfseNacional\DanfseGenerator;
 use DanfseNacional\Dto\NFSe;
+use DanfseNacional\Enums\AmbGerador;
 use PHPUnit\Framework\TestCase;
 
 class DanfseGeneratorTest extends TestCase
@@ -69,13 +69,7 @@ class DanfseGeneratorTest extends TestCase
 
     public function test_gera_com_config(): void
     {
-        $config = new DanfseConfig(
-            municipality: new MunicipalityBranding(
-                name: 'Prefeitura de Niterói',
-                department: 'Secretaria Municipal de Fazenda',
-                email: 'iss@fazenda.niteroi.rj.gov.br',
-            ),
-        );
+        $config = new DanfseConfig(canceled: true);
         $generator = new DanfseGenerator($config);
         $pdf = $generator->generateFromXml($this->realXml);
 
@@ -106,7 +100,8 @@ class DanfseGeneratorTest extends TestCase
         $this->assertSame('Prestador', $data['tipo_emitente']);
         $this->assertSame('NFS-e Gerada', $data['situacao']);
         $this->assertSame('', $data['finalidade']); // finNFSe ausente no XML v1.01
-        $this->assertSame('Sistema Nacional da NFS-e', $data['amb_gerador']);
+
+        $this->assertSame(AmbGerador::SISTEMA_NACIONAL->value, $data['amb_gerador']);
 
         // Prestador
         $this->assertSame('11.222.333/0001-81', $data['prestador']['cnpj_cpf']);
@@ -662,7 +657,6 @@ class DanfseGeneratorTest extends TestCase
         );
 
         $this->assertStringContainsString('NFS-e SEM VALIDADE JURÍDICA', $html);
-        $this->assertStringContainsString('Homologação', $html);
     }
 
     public function test_html_producao_nao_exibe_aviso_sem_validade(): void
@@ -672,7 +666,7 @@ class DanfseGeneratorTest extends TestCase
         );
 
         $this->assertStringNotContainsString('NFS-e SEM VALIDADE JURÍDICA', $html);
-        $this->assertStringContainsString('Produção', $html);
+        $this->assertStringContainsString('Tipo de Ambiente: 1', $html);
     }
 
     public function test_html_destinatario_identificado_renderiza_bloco(): void
@@ -764,5 +758,45 @@ class DanfseGeneratorTest extends TestCase
         $this->assertStringContainsString('INFORMAÇÕES COMPLEMENTARES', $html);
         $this->assertStringContainsString('Inf. Cont.:', $html);
         $this->assertStringContainsString('Totais Aproximados dos Tributos', $html);
+    }
+
+    // ── Identificação do município ────────────────────────────────────────────
+
+    public function test_mostrar_municipio_true_quando_cod_trib_nac_nao_comeca_com_99(): void
+    {
+        $data = (new \DanfseNacional\Template\DanfseTemplate())
+            ->buildData((new DanfseGenerator())->parseXml($this->realXml));
+
+        $this->assertTrue($data['mostrar_municipio']);
+        $this->assertSame('Niterói', $data['municipio_emissor']['nome']);
+        $this->assertSame('RJ', $data['municipio_emissor']['uf']);
+    }
+
+    public function test_mostrar_municipio_false_quando_cod_trib_nac_comeca_com_99(): void
+    {
+        $xml = str_replace('<cTribNac>010700</cTribNac>', '<cTribNac>990201</cTribNac>', $this->realXml);
+        $data = (new \DanfseNacional\Template\DanfseTemplate())
+            ->buildData((new DanfseGenerator())->parseXml($xml));
+
+        $this->assertFalse($data['mostrar_municipio']);
+    }
+
+    public function test_html_municipio_exibido_a_partir_do_xml(): void
+    {
+        $html = (new DanfseGenerator())->generateHtml(
+            (new DanfseGenerator())->parseXml($this->realXml)
+        );
+
+        $this->assertStringContainsString('Município: Niterói / RJ', $html);
+    }
+
+    public function test_html_municipio_oculto_quando_cod_trib_nac_comeca_com_99(): void
+    {
+        $xml = str_replace('<cTribNac>010700</cTribNac>', '<cTribNac>990101</cTribNac>', $this->realXml);
+        $html = (new DanfseGenerator())->generateHtml(
+            (new DanfseGenerator())->parseXml($xml)
+        );
+
+        $this->assertStringNotContainsString('Município: Niterói / RJ', $html);
     }
 }

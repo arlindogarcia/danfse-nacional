@@ -38,54 +38,9 @@ $pdf = $generator->generateFromXml($xml);
 file_put_contents('danfse.pdf', $pdf);
 ```
 
-## Logo da empresa
-
-Por padrão, o cabeçalho do documento exibe o logo incluído no pacote. Para substituí-lo pelo logo da empresa, informe o caminho do arquivo de imagem via `logoPath`. A biblioteca detecta o MIME type e monta o data URI automaticamente.
-
-```php
-use DanfseNacional\DanfseGenerator;
-use DanfseNacional\Config\DanfseConfig;
-
-$config = new DanfseConfig(logoPath: '/caminho/para/logo.png');
-$generator = new DanfseGenerator($config);
-
-$pdf = $generator->generateFromXml($xml);
-```
-
-Para suprimir o logo completamente, passe `false`.
-
-```php
-$config = new DanfseConfig(logoPath: false);
-```
-
-Caso o dado já esteja disponível como data URI (por exemplo, quando o logo é armazenado em banco de dados), é possível fornecê-lo diretamente via `logoDataUri`. Se ambos `logoDataUri` e `logoPath` forem informados, `logoDataUri` tem precedência. `logoPath: false` sempre suprime o logo, independente de `logoDataUri`.
-
-```php
-$config = new DanfseConfig(logoDataUri: 'data:image/png;base64,...');
-```
-
 ## Identificação do município
 
-O cabeçalho do DANFSe possui um espaço reservado para a identificação do ente municipal emissor. Por padrão esse espaço fica em branco. Para preenchê-lo, configure `MunicipalityBranding` com o nome do município, a secretaria responsável e o e-mail de contato. O logotipo do município segue a mesma convenção: aceita caminho de arquivo ou data URI.
-
-```php
-use DanfseNacional\DanfseGenerator;
-use DanfseNacional\Config\DanfseConfig;
-use DanfseNacional\Config\MunicipalityBranding;
-
-$config = new DanfseConfig(
-    logoPath: '/caminho/para/logo-empresa.png',
-    municipality: new MunicipalityBranding(
-        name: 'Prefeitura de Niterói',
-        department: 'Secretaria Municipal de Fazenda',
-        email: 'iss@fazenda.niteroi.rj.gov.br',
-        logoPath: '/caminho/para/logo-prefeitura.png',
-    ),
-);
-
-$generator = new DanfseGenerator($config);
-$pdf = $generator->generateFromXml($xml);
-```
+O cabeçalho do DANFSe exibe automaticamente o município e a UF do ente emissor, extraídos do próprio XML (`infNFSe/xLocEmi` e `infNFSe/emit/enderNac/UF`). A identificação não é exibida quando o código de tributação nacional do serviço for `99` (conforme a NT-008).
 
 ## Marca d'água
 

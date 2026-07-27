@@ -8,21 +8,13 @@
 require __DIR__ . '/../vendor/autoload.php';
 
 use DanfseNacional\Config\DanfseConfig;
-use DanfseNacional\Config\MunicipalityBranding;
 use DanfseNacional\DanfseGenerator;
 
 $examplesDir = __DIR__ . '/../examples';
 
-// danfse_com_config.html — com logo e identificação do município
+// danfse_com_config.html — com marca d'água de nota cancelada
 $xml       = file_get_contents($examplesDir . '/nfse_exemplo.xml');
-$config    = new DanfseConfig(
-    municipality: new MunicipalityBranding(
-        name:       'Prefeitura de Niterói',
-        department: 'Secretaria Municipal de Fazenda',
-        email:      'iss@fazenda.niteroi.rj.gov.br',
-        logoPath:   $examplesDir . '/brasao-niteroi.png',
-    ),
-);
+$config    = new DanfseConfig(canceled: true);
 $generator = new DanfseGenerator($config);
 $html      = $generator->generateHtml($generator->parseXml($xml));
 file_put_contents($examplesDir . '/danfse_com_config.html', $html);

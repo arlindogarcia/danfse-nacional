@@ -55,8 +55,7 @@ class DanfseTemplate
     public function render(NFSe $nfse, DanfseConfig $config): string
     {
         $data = $this->buildData($nfse);
-        $logo = $config->logoDataUri;
-        $municipality = $config->municipality;
+        $logo = $config->logo;
         $watermark = $config->canceled ? 'CANCELADA' : ($config->substituted ? 'SUBSTITUÍDA' : null);
         $qrCode = $this->generateQrCode($data['chave_acesso']);
         array_walk_recursive($data, fn(&$v) => $v = is_string($v) ? htmlspecialchars($v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : $v);
@@ -163,7 +162,7 @@ class DanfseTemplate
             'serie_dps' => $infDps?->serie ?? '-',
             'emissao_dps' => $this->fmt->dateTime($infDps?->dhEmi ?? ''),
             'ambiente' => (int) ($infDps?->tpAmb ?? 1),
-            'amb_gerador' => AmbGerador::labelFor($inf?->ambGer ?? ''),
+            'amb_gerador' => (int) ($inf?->ambGer ?? ''),
             'tipo_emitente' => TpEmitente::labelFor($infDps?->tpEmit ?? ''),
             // Situação (cStat) é obrigatória; Finalidade (finNFSe) é condicional.
             'situacao' => ($inf?->cStat ?? '') !== '' ? SituacaoNFSe::labelFor($inf->cStat) : '',
@@ -207,6 +206,12 @@ class DanfseTemplate
             'destinatario' => $destinatario,
             'destinatario_msg' => $destinatarioMsg,
             'ibs_cbs' => $ibsCbs,
+
+            'mostrar_municipio' => !str_starts_with(($cServ?->cTribNac ?? ''), '99'),
+            'municipio_emissor' => [
+                'nome' => $inf?->xLocEmi ?: '-',
+                'uf' => $inf?->emit?->enderNac?->UF ?: '-',
+            ],
 
             'servico' => [
                 'codigo_trib_nacional' => $this->fmt->codTribNacional($cServ?->cTribNac ?? ''),

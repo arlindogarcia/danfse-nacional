@@ -3,7 +3,6 @@
 require __DIR__ . '/../vendor/autoload.php';
 
 use DanfseNacional\Config\DanfseConfig;
-use DanfseNacional\Config\MunicipalityBranding;
 use DanfseNacional\DanfseGenerator;
 
 $xmlPath = __DIR__ . '/nfse_exemplo.xml';
@@ -32,19 +31,9 @@ echo "  Valor líquido: R$ " . $inf->valores->vLiq . "\n";
 echo "  Competência  : " . $inf->DPS->infDPS->dCompet . "\n";
 echo "  Ambiente     : " . ($inf->DPS->infDPS->tpAmb === '1' ? 'Produção' : 'Homologação') . "\n";
 
-// --- Exemplo 3: com logo e identificação do município ---
-// logoPath: null  → usa o logo padrão do pacote (assets/)
-// logoPath: false → nenhum logo exibido
-// brasao-niteroi.png por Guilherme Paula
+// --- Exemplo 3: com marca d'água de nota cancelada ---
 
-$config = new DanfseConfig(
-    municipality: new MunicipalityBranding(
-        name: 'Prefeitura de Niterói',
-        department: 'Secretaria Municipal de Fazenda',
-        email: 'iss@fazenda.niteroi.rj.gov.br',
-        logoPath: __DIR__ . '/brasao-niteroi.png',
-    ),
-);
+$config = new DanfseConfig(canceled: true);
 
 $generator = new DanfseGenerator($config);
 $pdf = $generator->generateFromXml($xml);
