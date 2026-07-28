@@ -222,11 +222,11 @@ $tm = $data['tributacao_municipal'] ?? null;
             </tr>
             <tr>
                 <td>
-                    <span class="label">NÚMERO DO DPS</span>
+                    <span class="label">NÚMERO DA DPS</span>
                     <span class="value"><?= $data['numero_dps'] ?></span>
                 </td>
                 <td>
-                    <span class="label">SÉRIE DO DPS</span>
+                    <span class="label">SÉRIE DA DPS</span>
                     <span class="value"><?= $data['serie_dps'] ?></span>
                 </td>
                 <td>
