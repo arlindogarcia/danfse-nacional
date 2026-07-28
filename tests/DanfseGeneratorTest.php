@@ -395,6 +395,39 @@ class DanfseGeneratorTest extends TestCase
         $this->assertSame('R$ 15,00', $data['tributacao_federal']['cp']);
         $this->assertSame('R$ 9,75', $data['tributacao_federal']['pis']);
         $this->assertSame('R$ 45,00', $data['tributacao_federal']['cofins']);
+
+        // tpRetPisCofins = 2 (Não Retido): contrib_sociais reflete apenas vRetCSLL
+        $this->assertSame('R$ 15,00', $data['tributacao_federal']['contrib_sociais']);
+    }
+
+    public function test_tributacao_federal_pis_cofins_retido(): void
+    {
+        // tpRetPisCofins = 1 (PIS/COFINS Retido):
+        // - contrib_sociais = vRetCSLL + vPis + vCofins
+        // - pis e cofins (débito apuração própria) retornam 0,00
+        $xml = str_replace('<tpRetPisCofins>2</tpRetPisCofins>', '<tpRetPisCofins>1</tpRetPisCofins>', $this->realXml);
+
+        $data = (new \DanfseNacional\Template\DanfseTemplate())
+            ->buildData((new DanfseGenerator())->parseXml($xml));
+
+        // CSLL(15,00) + PIS(9,75) + COFINS(45,00) = 69,75
+        $this->assertSame('R$ 69,75', $data['tributacao_federal']['contrib_sociais']);
+        $this->assertSame('R$ 0,00', $data['tributacao_federal']['pis']);
+        $this->assertSame('R$ 0,00', $data['tributacao_federal']['cofins']);
+        $this->assertSame('PIS/COFINS Retido', $data['tributacao_federal']['desc_contrib_sociais']);
+    }
+
+    public function test_tributacao_federal_pis_cofins_nao_retido_explicito(): void
+    {
+        // tpRetPisCofins = 2 (Não Retido) já é o padrão do XML de exemplo, mas testamos
+        // explicitamente a árvore de decisão simétrica ao caso retido.
+        $data = (new \DanfseNacional\Template\DanfseTemplate())
+            ->buildData((new DanfseGenerator())->parseXml($this->realXml));
+
+        $this->assertSame('R$ 15,00', $data['tributacao_federal']['contrib_sociais']);
+        $this->assertSame('R$ 9,75', $data['tributacao_federal']['pis']);
+        $this->assertSame('R$ 45,00', $data['tributacao_federal']['cofins']);
+        $this->assertSame('PIS/COFINS Não Retido', $data['tributacao_federal']['desc_contrib_sociais']);
     }
 
     // ── Totais ────────────────────────────────────────────────────────────────

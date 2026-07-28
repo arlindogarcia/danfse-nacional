@@ -253,9 +253,15 @@ class DanfseTemplate
             'tributacao_federal' => [
                 'irrf' => $tribFed?->vRetIRRF ? $this->fmt->currency($tribFed->vRetIRRF) : '-',
                 'cp' => $tribFed?->vRetCP ? $this->fmt->currency($tribFed->vRetCP) : '-',
-                'contrib_sociais' => $tribFed?->vRetCSLL ? $this->fmt->currency($tribFed->vRetCSLL) : '-',
-                'pis' => $tribFed?->piscofins?->vPis ? $this->fmt->currency($tribFed->piscofins->vPis) : '-',
-                'cofins' => $tribFed?->piscofins?->vCofins ? $this->fmt->currency($tribFed->piscofins->vCofins) : '-',
+                'contrib_sociais' => ($tribFed?->piscofins?->tpRetPisCofins ?? '') === '1'
+                    ? $this->fmt->currency((float)$tribFed->vRetCSLL + (float)$tribFed->piscofins->vPis + (float)$tribFed->piscofins->vCofins)
+                    : ($tribFed?->vRetCSLL ? $this->fmt->currency($tribFed->vRetCSLL) : '-'),
+                'pis' => ($tribFed?->piscofins?->tpRetPisCofins ?? '') === '1'
+                    ? $this->fmt->currency(0)
+                    : ($tribFed?->piscofins?->vPis ? $this->fmt->currency($tribFed->piscofins->vPis) : '-'),
+                'cofins' => ($tribFed?->piscofins?->tpRetPisCofins ?? '') === '1'
+                    ? $this->fmt->currency(0)
+                    : ($tribFed?->piscofins?->vCofins ? $this->fmt->currency($tribFed->piscofins->vCofins) : '-'),
                 'desc_contrib_sociais' => ($tribFed?->piscofins?->tpRetPisCofins ?? '') !== ''
                     ? TpRetPisCofins::labelFor($tribFed->piscofins->tpRetPisCofins)
                     : '-',
