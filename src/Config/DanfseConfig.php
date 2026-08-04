@@ -9,6 +9,7 @@ readonly class DanfseConfig
     public function __construct(
         public bool $canceled = false,
         public bool $substituted = false,
+        public bool $stub = false,
     ) {
         $this->logo = self::defaultLogo();
     }

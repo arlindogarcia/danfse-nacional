@@ -99,7 +99,7 @@ class DanfseGeneratorTest extends TestCase
         // Identificação
         $this->assertSame('Prestador', $data['tipo_emitente']);
         $this->assertSame('NFS-e Gerada', $data['situacao']);
-        $this->assertSame('', $data['finalidade']); // finNFSe ausente no XML v1.01
+        $this->assertSame('-', $data['finalidade']); // finNFSe ausente no XML v1.01
 
         $this->assertSame(AmbGerador::SISTEMA_NACIONAL->value, $data['amb_gerador']);
 
@@ -108,12 +108,12 @@ class DanfseGeneratorTest extends TestCase
         $this->assertSame('EMPRESA EXEMPLO DESENVOLVIMENTO LTDA', $data['prestador']['nome']);
         $this->assertSame('Niterói / RJ', $data['prestador']['municipio']);
         $this->assertSame('987654', $data['prestador']['im']);
-        $this->assertSame('3303302 / 24020-005', $data['prestador']['codigo_ibge_cep']);
+        $this->assertSame('33.03302 / 24.020-005', $data['prestador']['codigo_ibge_cep']);
 
         // Tomador
         $this->assertSame('91.712.343/0001-34', $data['tomador']['cnpj_cpf']);
         $this->assertSame('CLIENTE FICTICIO COMERCIO S.A.', $data['tomador']['nome']);
-        $this->assertSame('3550308 / 01310-100', $data['tomador']['codigo_ibge_cep']);
+        $this->assertSame('35.50308 / 01.310-100', $data['tomador']['codigo_ibge_cep']);
 
         // Serviço
         $this->assertSame('01.07.00', $data['servico']['codigo_trib_nacional']);
@@ -190,7 +190,7 @@ class DanfseGeneratorTest extends TestCase
         // Destinatário identificado
         $this->assertNotNull($data['destinatario']);
         $this->assertSame('DESTINATARIO FINAL SERVICOS LTDA', $data['destinatario']['nome']);
-        $this->assertSame('3304557 / 20040-002', $data['destinatario']['codigo_ibge_cep']);
+        $this->assertSame('33.04557 / 20.040-002', $data['destinatario']['codigo_ibge_cep']);
         $this->assertSame('', $data['destinatario_msg']);
 
         // Bloco IBS/CBS
@@ -238,7 +238,7 @@ class DanfseGeneratorTest extends TestCase
         $this->assertSame('PRESTADOR DECLARADO NA DPS LTDA', $data['prestador']['nome']);
         $this->assertSame('111222', $data['prestador']['im']);
         $this->assertSame('Rio de Janeiro / RJ', $data['prestador']['municipio']);
-        $this->assertSame('3304557 / 20040-002', $data['prestador']['codigo_ibge_cep']);
+        $this->assertSame('33.04557 / 20.040-002', $data['prestador']['codigo_ibge_cep']);
         $this->assertSame('(21) 9999-0000', $data['prestador']['telefone']);
     }
 
@@ -758,7 +758,7 @@ class DanfseGeneratorTest extends TestCase
             (new DanfseGenerator())->parseXml($xml)
         );
 
-        $this->assertStringNotContainsString('INTERMEDIÁRIO DA OPERAÇÃO', $html);
+        $this->assertStringContainsString('INTERMEDIÁRIO DA OPERAÇÃO NÃO IDENTIFICADO NA NFS-e', $html);
     }
 
     public function test_html_bloco_ibscbs_renderiza_quando_presente(): void

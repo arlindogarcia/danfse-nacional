@@ -61,7 +61,7 @@ class FormatterTest extends TestCase
 
     public function test_formatacao_cep(): void
     {
-        $this->assertSame('24020-085', $this->fmt->cep('24020085'));
+        $this->assertSame('24.020-085', $this->fmt->cep('24020085'));
     }
 
     public function test_formatacao_data(): void

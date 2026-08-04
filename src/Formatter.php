@@ -59,7 +59,22 @@ class Formatter
         $value = preg_replace('/\D/', '', $value);
 
         if (strlen($value) === 8) {
-            return preg_replace('/(\d{5})(\d{3})/', '$1-$2', $value);
+            return preg_replace('/(\d{2})(\d{3})(\d{3})/', '$1.$2-$3', $value);
+        }
+
+        return $value;
+    }
+
+    public function munIbge(string $value): string
+    {
+        if ($value === '' || $value === '-') {
+            return '-';
+        }
+
+        $value = preg_replace('/\D/', '', $value);
+
+        if (strlen($value) === 7) {
+            return preg_replace('/(\d{2})(\d{5})/', '$1.$2', $value);
         }
 
         return $value;

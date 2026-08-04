@@ -57,6 +57,7 @@ class DanfseTemplate
         $data = $this->buildData($nfse);
         $logo = $config->logo;
         $watermark = $config->canceled ? 'CANCELADA' : ($config->substituted ? 'SUBSTITUÍDA' : null);
+        $stub = $config->stub;
         $qrCode = $this->generateQrCode($data['chave_acesso']);
         array_walk_recursive($data, fn(&$v) => $v = is_string($v) ? htmlspecialchars($v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : $v);
 
@@ -166,7 +167,7 @@ class DanfseTemplate
             'tipo_emitente' => TpEmitente::labelFor($infDps?->tpEmit ?? ''),
             // Situação (cStat) é obrigatória; Finalidade (finNFSe) é condicional.
             'situacao' => ($inf?->cStat ?? '') !== '' ? SituacaoNFSe::labelFor($inf->cStat) : '',
-            'finalidade' => $finNFSe !== '' ? FinNFSe::labelFor($finNFSe) : '',
+            'finalidade' => $finNFSe !== '' ? FinNFSe::labelFor($finNFSe) : '-',
 
             'prestador' => [
                 'nome' => $prest?->xNome ?: $inf?->emit?->xNome ?: '-',
@@ -511,6 +512,7 @@ class DanfseTemplate
     {
         $cep = $this->fmt->cep($cep);
         $cep = $cep === '-' ? '' : $cep;
+        $cMun = $this->fmt->munIbge($cMun);
 
         return match (true) {
             $cMun !== '' && $cep !== '' => "{$cMun} / {$cep}",
@@ -521,7 +523,7 @@ class DanfseTemplate
     }
 
     /**
-     * Retorna o primeiro valor monetário não vazio já formatado, ou '-' se todos estiverem vazios.
+     * Retorna o primeiro valor monetário não vazio já formatado, ou uma string vazia se todos estiverem vazios.
      */
     private function firstCurrency(string ...$values): string
     {
@@ -530,7 +532,7 @@ class DanfseTemplate
                 return $this->fmt->currency($v);
             }
         }
-        return '-';
+        return '';
     }
 
     /**

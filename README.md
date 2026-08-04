@@ -56,6 +56,15 @@ $config = new DanfseConfig(substituted: true);
 $pdf = (new DanfseGenerator($config))->generateFromXml($xml);
 ```
 
+## Bloco de Canhoto
+
+Opcionalmente, é possível exibir um bloco fixo no rodapé da página com os campos "Data da Cientificação", "Identificação e Assinatura" e o número/chave da NFS-e, destinado à assinatura em vias impressas. Desativado por padrão.
+
+```php
+$config = new DanfseConfig(stub: true);
+$pdf = (new DanfseGenerator($config))->generateFromXml($xml);
+```
+
 ## Geração em dois passos
 
 É possível acessar o método `parseXml()` para obter um objeto `DanfseNacional\Dto\NFSe` com os dados da NFS-e antes de gerar o PDF.

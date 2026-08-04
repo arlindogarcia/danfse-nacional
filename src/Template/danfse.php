@@ -3,6 +3,9 @@
 /** @var string $logo */
 /** @var string $qrCode */
 /** @var string|null $watermark */
+/** @var bool $stub */
+
+use DanfseNacional\Enums\RegEspTrib;
 
 $tm = $data['tributacao_municipal'] ?? null;
 ?>
@@ -27,6 +30,26 @@ $tm = $data['tributacao_municipal'] ?? null;
             border: 1pt #000 solid;
             -webkit-box-decoration-break: clone;
             box-decoration-break: clone;
+            position: relative;
+        }
+
+        .footer-fixed {
+            position: absolute;
+            bottom: 5pt;
+            border: 1pt solid #000;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 98%;
+        }
+
+        .footer-fixed td {
+            border-right: 1pt solid #000;
+            padding: 3pt 5pt;
+            vertical-align: top;
+        }
+
+        .footer-fixed td:last-child {
+            border-right: none;
         }
 
         table {
@@ -54,16 +77,13 @@ $tm = $data['tributacao_municipal'] ?? null;
             border-bottom: 1px solid #000;
         }
 
-        .bordered-section:last-of-type {
+        .bordered-section:last-of-type,
+        .bordered-section.last {
             border-bottom: none;
         }
 
         .first-section {
             position: relative;
-        }
-
-        .first-section table td {
-            padding-bottom: 0 !important;
         }
 
         .first-section .main-label {
@@ -80,7 +100,7 @@ $tm = $data['tributacao_municipal'] ?? null;
             font-weight: bold;
             color: #000;
             display: block;
-            margin-bottom: 2pt;
+            margin-bottom: 1pt;
         }
 
         .value {
@@ -88,6 +108,7 @@ $tm = $data['tributacao_municipal'] ?? null;
             font-weight: normal;
             color: #000;
             font-family: sans-serif;
+            margin-bottom: 2pt;
         }
 
         .section-title {
@@ -108,7 +129,7 @@ $tm = $data['tributacao_municipal'] ?? null;
 
         .header-table td {
             border: none;
-            padding-bottom: 1pt !important;
+            padding-bottom: 1pt;
             background-color: #f2f2f2;
         }
 
@@ -116,6 +137,7 @@ $tm = $data['tributacao_municipal'] ?? null;
             width: 130pt;
             text-align: left;
             vertical-align: middle;
+            padding-bottom: 4pt !important;
         }
 
         .title-cell {
@@ -127,12 +149,13 @@ $tm = $data['tributacao_municipal'] ?? null;
             width: 150pt;
             text-align: left;
             font-size: 5.5pt;
-            vertical-align: top;
+            vertical-align: middle;
         }
 
         .qr-container {
             text-align: center;
             position: absolute;
+            width: 185px;
         }
 
         /* Watermark para nota cancelada/substituída */
@@ -146,6 +169,16 @@ $tm = $data['tributacao_municipal'] ?? null;
             color: #e8e8e8;
             white-space: nowrap;
             z-index: -1;
+        }
+
+        @media dompdf {
+            .footer-fixed {
+                position: fixed;
+                bottom: 35pt;
+                width: 96%;
+                left: 12pt;
+                transform: none;
+            }
         }
     </style>
 </head>
@@ -192,7 +225,7 @@ $tm = $data['tributacao_municipal'] ?? null;
         <table>
             <tr>
                 <td colspan="3">
-                    <span class="label">CHAVE DE ACESSO DA NFS-E</span>
+                    <span class="label">CHAVE DE ACESSO DA NFS-e</span>
                     <span class="value"><?= $data['chave_acesso'] ?></span>
                 </td>
                 <td style="width: 25%;" rowspan="3">
@@ -208,15 +241,15 @@ $tm = $data['tributacao_municipal'] ?? null;
             </tr>
             <tr>
                 <td style="width: 25%;">
-                    <span class="label">NÚMERO DA NFS-E</span>
+                    <span class="label">NÚMERO DA NFS-e</span>
                     <span class="value"><?= $data['numero_nfse'] ?></span>
                 </td>
                 <td style="width: 25%;">
-                    <span class="label">COMPETÊNCIA DA NFS-E</span>
+                    <span class="label">COMPETÊNCIA DA NFS-e</span>
                     <span class="value"><?= $data['competencia'] ?></span>
                 </td>
                 <td style="width: 25%;">
-                    <span class="label">DATA E HORA DA EMISSÃO DA NFS-E</span>
+                    <span class="label">DATA E HORA DA EMISSÃO DA NFS-e</span>
                     <span class="value"><?= $data['emissao_nfse'] ?></span>
                 </td>
             </tr>
@@ -236,20 +269,18 @@ $tm = $data['tributacao_municipal'] ?? null;
             </tr>
             <tr>
                 <td class="main-label">
-                    <span class="label">EMITENTE DA NFS-E</span>
+                    <span class="label">EMITENTE DA NFS-e</span>
                     <span class="value"><?= $data['tipo_emitente'] ?></span>
                 </td>
                 <td>
                     <?php if ($data['situacao'] !== ''): ?>
-                    <span class="label">SITUAÇÃO DA NFS-E</span>
+                    <span class="label">SITUAÇÃO DA NFS-e</span>
                     <span class="value"><?= $data['situacao'] ?></span>
                     <?php endif; ?>
                 </td>
                 <td>
-                    <?php if ($data['finalidade'] !== ''): ?>
                     <span class="label">FINALIDADE</span>
-                    <span class="value"><?= $data['finalidade'] ?></span>
-                    <?php endif; ?>
+                    <span class="value"><?= $data['finalidade'] ?? '-' ?></span>
                 </td>
             </tr>
         </table>
@@ -301,7 +332,7 @@ $tm = $data['tributacao_municipal'] ?? null;
             </tr>
             <tr>
                 <td>
-                    <span class="label" style="font-size: 6.8pt">Simples Nacional na Data de Competência</span>
+                    <span class="label" style="font-size: 6pt">Simples Nacional na Data de Competência</span>
                     <span class="value"><?= $data['prestador']['simples_nacional'] ?></span>
                 </td>
                 <td COLSPAN="3">
@@ -457,7 +488,7 @@ $tm = $data['tributacao_municipal'] ?? null;
     </div>
     <?php else: ?>
     <div class="bordered-section" style="text-align: center; font-weight: normal; font-size: 7pt;">
-        INTERMEDIÁRIO DO SERVIÇO NÃO IDENTIFICADO NA NFS-e
+        INTERMEDIÁRIO DA OPERAÇÃO NÃO IDENTIFICADO NA NFS-e
     </div>
     <?php endif; ?>
 
@@ -517,7 +548,7 @@ $tm = $data['tributacao_municipal'] ?? null;
 
             <?php
             if (
-                !empty($tm['regime_especial']) || !empty($tm['tipo_imunidade']) ||
+                $tm['regime_especial'] !== RegEspTrib::labelFor(RegEspTrib::NENHUM->value) || !empty($tm['tipo_imunidade']) ||
                 !empty($tm['suspensao_exigibilidade']) || !empty($tm['num_processo_suspensao'])
             ):
             ?>
@@ -566,25 +597,6 @@ $tm = $data['tributacao_municipal'] ?? null;
                 </td>
             </tr>
             <?php endif; ?>
-
-            <tr>
-                <td>
-                    <span class="label">Valor do Serviço</span>
-                    <span class="value"><?= $tm['valor_servico'] ?? '-' ?></span>
-                </td>
-                <td>
-                    <span class="label">Desconto Incondicionado</span>
-                    <span class="value"><?= $tm['desconto_incondicionado'] ?? '-' ?></span>
-                </td>
-                <td>
-                    <span class="label">Total Deduções/Reduções</span>
-                    <span class="value"><?= $tm['total_deducoes'] ?? '-' ?></span>
-                </td>
-                <td>
-                    <span class="label">Cálculo do BM</span>
-                    <span class="value"><?= $tm['calculo_bm'] ?? '-' ?></span>
-                </td>
-            </tr>
             <tr>
                 <td>
                     <span class="label">BC ISSQN</span>
@@ -746,7 +758,7 @@ $tm = $data['tributacao_municipal'] ?? null;
                     <span class="value"><?= $data['totais']['retencoes_federais'] ?? '-' ?></span>
                 </td>
                 <td style="width: 25%;">
-                    <span class="label">VALOR LÍQUIDO DA NFS-E</span>
+                    <span class="label">VALOR LÍQUIDO DA NFS-e</span>
                     <span class="value" style="font-weight: bold;"><?= $data['totais']['valor_liquido'] ?></span>
                 </td>
                 <td style="width: 25%;">
@@ -754,7 +766,7 @@ $tm = $data['tributacao_municipal'] ?? null;
                     <span class="value"><?= $data['totais']['total_ibs_cbs'] ?? '-' ?></span>
                 </td>
                 <td style="width: 25%;">
-                    <span class="label">VALOR LÍQUIDO DA NFS-E + IBS/CBS</span>
+                    <span class="label">VALOR LÍQUIDO DA NFS-e + IBS/CBS</span>
                     <span class="value" style="font-weight: bold;"><?= $data['totais']['valor_liquido_ibscbs'] ?? '-' ?></span>
                 </td>
             </tr>
@@ -762,7 +774,7 @@ $tm = $data['tributacao_municipal'] ?? null;
     </div>
 
     <!-- Informações Complementares -->
-    <div class="bordered-section">
+    <div class="bordered-section last">
         <table>
             <tr>
                 <td class="section-title no-bg">
@@ -776,5 +788,23 @@ $tm = $data['tributacao_municipal'] ?? null;
             </tr>
         </table>
     </div>
+
+    <!-- Canhoto -->
+    <?php if ($stub): ?>
+    <table class="footer-fixed">
+        <tr>
+            <td style="width: 25%;">
+                <span class="label">DATA CIENTIFICAÇÃO:</span>
+            </td>
+            <td style="width: 25%;">
+                <span class="label">IDENTIFICAÇÃO E ASSINATURA</span>
+            </td>
+            <td style="width: 50%;">
+                <span class="label">N° NFS-e / CHAVE NFS-e</span>
+                <span class="value"><?= $data['numero_nfse'] ?> / <?= $data['chave_acesso'] ?></span>
+            </td>
+        </tr>
+    </table>
+    <?php endif; ?>
 </body>
 </html>
