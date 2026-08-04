@@ -3,6 +3,10 @@ composer.lock
 /.idea/
 /.phpunit.result.cache
 
+# Arquivo de token do servidor de desenvolvimento
+/.watch-token
+
 # Saídas geradas pelos scripts de exemplo
 /examples/danfse_com_config.*
 /examples/danfse_simples.*
+/examples/danfse_ibscbs.*

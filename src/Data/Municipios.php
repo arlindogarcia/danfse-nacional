@@ -5585,10 +5585,14 @@ final class Municipios
     /**
      * Retorna "Nome - UF" para o código IBGE informado, ou o próprio código se não encontrado.
      */
-    public static function lookup(string|int $cMun): string
+    public static function lookup(string|int|null $cMun): string
     {
+        if (is_null($cMun)) {
+            return '';
+        }
+
         $code = (int) $cMun;
         $m    = self::MAP[$code] ?? null;
-        return $m !== null ? $m['nome'] . ' - ' . $m['uf'] : (string) $cMun;
+        return $m !== null ? $m['nome'] . ' / ' . $m['uf'] : (string) $cMun;
     }
 }

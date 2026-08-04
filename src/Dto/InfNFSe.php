@@ -20,8 +20,10 @@ readonly class InfNFSe
         public string $cStat = '',
         public string $dhProc = '',
         public string $nDFSe = '',
+        public string $xOutInf = '',
         public ?Emitente $emit = null,
         public ?ValoresNFSe $valores = null,
+        public ?RtcIBSCBSNFSe $IBSCBS = null,
         public ?Dps $DPS = null,
     ) {}
 }

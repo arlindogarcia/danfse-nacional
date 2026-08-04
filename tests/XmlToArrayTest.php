@@ -14,7 +14,7 @@ class XmlToArrayTest extends TestCase
         $this->converter = new XmlToArray();
     }
 
-    public function test_converts_simple_xml(): void
+    public function test_converte_xml_simples(): void
     {
         $xml = '<?xml version="1.0" encoding="utf-8"?>'
             . '<root xmlns="http://www.sped.fazenda.gov.br/nfse">'
@@ -25,7 +25,7 @@ class XmlToArrayTest extends TestCase
         $this->assertSame('value', $result['child']);
     }
 
-    public function test_extracts_attributes(): void
+    public function test_extrai_atributos(): void
     {
         $xml = '<?xml version="1.0" encoding="utf-8"?>'
             . '<root xmlns="http://www.sped.fazenda.gov.br/nfse" versao="1.01">'
@@ -36,7 +36,7 @@ class XmlToArrayTest extends TestCase
         $this->assertSame('1.01', $result['versao']);
     }
 
-    public function test_excludes_signature_elements(): void
+    public function test_exclui_elementos_de_assinatura(): void
     {
         $xml = '<?xml version="1.0" encoding="utf-8"?>'
             . '<root xmlns="http://www.sped.fazenda.gov.br/nfse">'
@@ -49,7 +49,7 @@ class XmlToArrayTest extends TestCase
         $this->assertArrayNotHasKey('Signature', $result);
     }
 
-    public function test_parses_real_nfse_xml(): void
+    public function test_parseia_xml_nfse_real(): void
     {
         $xml = file_get_contents(__DIR__ . '/../examples/nfse_exemplo.xml');
         $this->assertNotFalse($xml);

@@ -11,5 +11,6 @@ readonly class PisCofins
         public string $pAliqCofins = '',
         public string $vPis = '',
         public string $vCofins = '',
+        public string $tpRetPisCofins = '',
     ) {}
 }

@@ -4,9 +4,9 @@ Biblioteca PHP para geração de PDF do DANFSe (Documento Auxiliar da Nota Fisca
 
 A biblioteca recebe o XML de uma NFS-e autorizada e devolve o conteúdo binário de um PDF em A4 retrato, sem nenhuma dependência de framework. Pode ser usada em projetos Laravel, Symfony, ou em scripts PHP puro.
 
-O objetivo principal desta biblioteca é criar um documento o mais fiel possível ao DANFSe original gerado pela API da SEFAZ, com apenas alguns ajustes para melhorar a legibilidade.
+O layout segue as exigências da **NT 008 (DANFSe v2.0)**: todos os campos são exibidos na mesma ordem definida pela norma e formatados conforme suas regras. Em vez de reproduzir coordenadas fixas, o documento adota um layout fluido — o que o torna adaptável a diferentes volumes de conteúdo sem perda de legibilidade.
 
-Nas NFS-e do ambiente de Homologação, o PDF apresenta a mesma mensagem do documento original, "NFS-e SEM VALIDADE JURÍDICA", além de uma marca d’água adicional para diferenciar os PDFs de teste dos emitidos em Produção. 
+Nas NFS-e do ambiente de Homologação, o PDF exibe a mensagem "NFS-e SEM VALIDADE JURÍDICA", conforme previsto na norma. Para notas canceladas ou substituídas, é possível exibir uma marca d’água correspondente — veja a seção [Marca d’água](#marca-dágua) abaixo.
 
 ## Exemplos
 
@@ -15,7 +15,7 @@ Nas NFS-e do ambiente de Homologação, o PDF apresenta a mesma mensagem do docu
 
 ## Requisitos
 
-PHP 8.1 ou superior com as extensões `simplexml`, `mbstring` e `fileinfo` habilitadas.
+PHP >= 8.2 com as extensões `simplexml`, `mbstring` e `fileinfo` habilitadas.
 
 ## Instalação
 
@@ -38,53 +38,31 @@ $pdf = $generator->generateFromXml($xml);
 file_put_contents('danfse.pdf', $pdf);
 ```
 
-## Logo da empresa
-
-Por padrão, o cabeçalho do documento exibe o logo incluído no pacote. Para substituí-lo pelo logo da empresa, informe o caminho do arquivo de imagem via `logoPath`. A biblioteca detecta o MIME type e monta o data URI automaticamente.
-
-```php
-use DanfseNacional\DanfseGenerator;
-use DanfseNacional\Config\DanfseConfig;
-
-$config = new DanfseConfig(logoPath: '/caminho/para/logo.png');
-$generator = new DanfseGenerator($config);
-
-$pdf = $generator->generateFromXml($xml);
-```
-
-Para suprimir o logo completamente, passe `false`.
-
-```php
-$config = new DanfseConfig(logoPath: false);
-```
-
-Caso o dado já esteja disponível como data URI (por exemplo, quando o logo é armazenado em banco de dados), é possível fornecê-lo diretamente via `logoDataUri`. Se ambos `logoDataUri` e `logoPath` forem informados, `logoDataUri` tem precedência. `logoPath: false` sempre suprime o logo, independente de `logoDataUri`.
-
-```php
-$config = new DanfseConfig(logoDataUri: 'data:image/png;base64,...');
-```
-
 ## Identificação do município
 
-O cabeçalho do DANFSe possui um espaço reservado para a identificação do ente municipal emissor. Por padrão esse espaço fica em branco. Para preenchê-lo, configure `MunicipalityBranding` com o nome do município, a secretaria responsável e o e-mail de contato. O logotipo do município segue a mesma convenção: aceita caminho de arquivo ou data URI.
+O cabeçalho do DANFSe exibe automaticamente o município e a UF do ente emissor, extraídos do próprio XML (`infNFSe/xLocEmi` e `infNFSe/emit/enderNac/UF`). A identificação não é exibida quando o código de tributação nacional do serviço for `99` (conforme a NT-008).
+
+## Marca d'água
+
+Para notas canceladas ou substituídas, configure as flags correspondentes em `DanfseConfig`. O PDF exibirá uma marca d'água "CANCELADA" ou "SUBSTITUÍDA" em diagonal sobre o documento.
 
 ```php
-use DanfseNacional\DanfseGenerator;
-use DanfseNacional\Config\DanfseConfig;
-use DanfseNacional\Config\MunicipalityBranding;
+// Nota cancelada
+$config = new DanfseConfig(canceled: true);
+$pdf = (new DanfseGenerator($config))->generateFromXml($xml);
 
-$config = new DanfseConfig(
-    logoPath: '/caminho/para/logo-empresa.png',
-    municipality: new MunicipalityBranding(
-        name: 'Prefeitura de Niterói',
-        department: 'Secretaria Municipal de Fazenda',
-        email: 'iss@fazenda.niteroi.rj.gov.br',
-        logoPath: '/caminho/para/logo-prefeitura.png',
-    ),
-);
+// Nota substituída
+$config = new DanfseConfig(substituted: true);
+$pdf = (new DanfseGenerator($config))->generateFromXml($xml);
+```
 
-$generator = new DanfseGenerator($config);
-$pdf = $generator->generateFromXml($xml);
+## Bloco de Canhoto
+
+Opcionalmente, é possível exibir um bloco fixo no rodapé da página com os campos "Data da Cientificação", "Identificação e Assinatura" e o número/chave da NFS-e, destinado à assinatura em vias impressas. Desativado por padrão.
+
+```php
+$config = new DanfseConfig(stub: true);
+$pdf = (new DanfseGenerator($config))->generateFromXml($xml);
 ```
 
 ## Geração em dois passos
@@ -143,30 +121,58 @@ O método `parseXml()` retorna um objeto `DanfseNacional\Dto\NFSe` com proprieda
 
 ```
 NFSe
-└── InfNFSe
+└── infNFSe (InfNFSe)
     ├── emit (Emitente)
     │   └── enderNac (EnderecoEmitente)
     ├── valores (ValoresNFSe)
+    ├── IBSCBS (RtcIBSCBSNFSe)
+    │   ├── valores (ValoresIbsCbs)
+    │   └── totCIBS (TotCIbs)
+    │       ├── gIBS (TotIbs)
+    │       │   ├── gIBSMun (TotIbsMun)
+    │       │   └── gIBSUF (TotIbsUf)
+    │       └── gCBS (TotCbs)
     └── DPS (Dps)
         └── infDPS (InfDPS)
             ├── prest (Prestador)
+            │   ├── end (Endereco)
+            │   │   ├── endNac (EnderecoNacional)
+            │   │   └── endExt (EnderecoExt)
             │   └── regTrib (RegTrib)
             ├── toma (Tomador)
             │   └── end (Endereco)
-            │       └── endNac (EnderecoNacional)
+            │       ├── endNac (EnderecoNacional)
+            │       └── endExt (EnderecoExt)
             ├── interm (Intermediario)
             │   └── end (Endereco)
+            │       ├── endNac (EnderecoNacional)
+            │       └── endExt (EnderecoExt)
             ├── serv (Servico)
             │   ├── locPrest (LocPrest)
-            │   └── cServ (CServ)
-            └── valores (Valores)
-                ├── vServPrest (VServPrest)
-                └── trib (Tributacao)
-                    ├── tribMun (TribMunicipal)
-                    ├── tribFed (TribFederal)
-                    │   └── piscofins (PisCofins)
-                    └── totTrib (TotTrib)
-                        └── pTotTrib (TotTribPercent)
+            │   ├── cServ (CServ)
+            │   ├── infoCompl (InfoCompl)
+            │   │   └── gItemPed (GItemPed)
+            │   ├── obra (Obra)
+            │   └── atvEvento (AtvEvento)
+            ├── valores (Valores)
+            │   ├── vServPrest (VServPrest)
+            │   └── trib (Tributacao)
+            │       ├── tribMun (TribMunicipal)
+            │       │   ├── exigSusp (ExigSuspensa)
+            │       │   └── BM (BeneficioMunicipal)
+            │       ├── tribFed (TribFederal)
+            │       │   └── piscofins (PisCofins)
+            │       └── totTrib (TotTrib)
+            │           ├── vTotTrib (TotTribValue)
+            │           └── pTotTrib (TotTribPercent)
+            ├── IBSCBS (RtcIBSCBS)
+            │   ├── dest (Destinatario)
+            │   │   └── end (Endereco)
+            │   ├── valores (InfoValoresIbsCbs)
+            │   │   └── trib (TribIbsCbs)
+            │   │       └── gIBSCBS (SitClasIbsCbs)
+            │   └── imovel (Imovel)
+            └── subst (Subst)
 ```
 
 Todos os campos opcionais no esquema da NFS-e são representados como propriedades `nullable` ou com valor padrão de string vazia, portanto o acesso nunca lança exceções por campo ausente.

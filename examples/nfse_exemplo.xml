@@ -9,7 +9,7 @@
         <xTribNac>Desenvolvimento e licenciamento de programas de computador customizáveis.</xTribNac>
         <xTribMun>Desenvolvimento e licenciamento de programas de computador customizáveis.</xTribMun>
         <verAplic>EXEMPLO_1.0.0</verAplic>
-        <ambGer>1</ambGer>
+        <ambGer>2</ambGer>
         <tpEmis>1</tpEmis>
         <procEmi>1</procEmi>
         <cStat>100</cStat>
@@ -17,6 +17,7 @@
         <nDFSe>9900001</nDFSe>
         <emit>
             <CNPJ>11222333000181</CNPJ>
+            <IM>987654</IM>
             <xNome>EMPRESA EXEMPLO DESENVOLVIMENTO LTDA</xNome>
             <enderNac>
                 <xLgr>Rua Visconde do Rio Branco</xLgr>
@@ -44,6 +45,17 @@
                 <cLocEmi>3303302</cLocEmi>
                 <prest>
                     <CNPJ>11222333000181</CNPJ>
+                    <IM>987654</IM>
+                    <xNome>EMPRESA EXEMPLO DESENVOLVIMENTO LTDA</xNome>
+                    <end>
+                        <endNac>
+                            <cMun>3303302</cMun>
+                            <CEP>24020005</CEP>
+                        </endNac>
+                        <xLgr>Rua Visconde do Rio Branco</xLgr>
+                        <nro>100</nro>
+                        <xBairro>Centro</xBairro>
+                    </end>
                     <fone>2130001234</fone>
                     <email>financeiro@empresaexemplo.com.br</email>
                     <regTrib>
@@ -81,7 +93,7 @@
                     </end>
                     <fone>1133334444</fone>
                     <email>contato@intermediarioficticio.com.br</email>
-                    <IMPrestMun>123456</IMPrestMun>
+                    <IM>123456</IM>
                 </interm>
                 <serv>
                     <locPrest>
@@ -91,6 +103,7 @@
                         <cTribNac>010700</cTribNac>
                         <cTribMun>007</cTribMun>
                         <xDescServ>Desenvolvimento de sistema de gestão empresarial - Contrato #2026-001</xDescServ>
+                        <cNBS>110811000</cNBS>
                     </cServ>
                     <infoCompl>
                         <xInfComp>Referente ao contrato de prestação de serviços nº 2026-001, firmado em 02/01/2026. Pagamento conforme cronograma acordado. Pedido de compra: PC-00123.</xInfComp>
@@ -109,6 +122,7 @@
                             <vISSQN>27.00</vISSQN>
                             <vDescCond>50.00</vDescCond>
                             <vDescIncond>100.00</vDescIncond>
+                            <cPaisResult>BR</cPaisResult>
                         </tribMun>
                         <tribFed>
                             <piscofins>
@@ -118,6 +132,7 @@
                                 <pAliqCofins>3.00</pAliqCofins>
                                 <vPis>9.75</vPis>
                                 <vCofins>45.00</vCofins>
+                                <tpRetPisCofins>2</tpRetPisCofins>
                             </piscofins>
                             <vRetIRRF>22.50</vRetIRRF>
                             <vRetCP>15.00</vRetCP>

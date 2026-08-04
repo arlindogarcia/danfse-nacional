@@ -19,5 +19,7 @@ readonly class InfDPS
         public ?Intermediario $interm = null,
         public ?Servico $serv = null,
         public ?Valores $valores = null,
+        public ?RtcIBSCBS $IBSCBS = null,
+        public ?Subst $subst = null,
     ) {}
 }
