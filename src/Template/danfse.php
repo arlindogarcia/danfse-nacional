@@ -231,7 +231,7 @@ $tm = $data['tributacao_municipal'] ?? null;
                 <td style="width: 25%;" rowspan="3">
                     <div class="qr-container">
                         <img src="<?= htmlspecialchars($qrCode) ?>" alt="QR Code"
-                             style="width: 60px; height: 60px; display: block; margin: 0 auto;"/>
+                             style="width: 65px; height: 65px; display: block; margin: 0 auto;"/>
                         <div style="font-size: 6pt; padding-top: 2pt; text-align: left;">
                             A autenticidade desta NFS-e pode ser verificada pela leitura deste código QR ou pela
                             consulta da chave de acesso no portal nacional da NFS-e
