@@ -1,7 +1,7 @@
 {
     "name": "andrevabo/danfse-nacional",
     "description": "Gerador de PDF do DANFSe Nacional a partir do XML da NFS-e Padrão Nacional",
-    "keywords": ["danfse", "nfs-e", "nfse", "nfse-nacional", "danfe", "pdf", "nota-fiscal", "brazil"],
+    "keywords": ["danfse", "nfs-e", "nfse", "nfse-nacional", "danfe", "pdf", "nota-fiscal", "brasil", "brazil"],
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -17,6 +17,7 @@
     },
     "require": {
         "php": "^8.2",
+        "ext-ctype": "*",
         "ext-simplexml": "*",
         "ext-mbstring": "*",
         "ext-fileinfo": "*",
