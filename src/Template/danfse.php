@@ -765,9 +765,9 @@ $tm = $data['tributacao_municipal'] ?? null;
                     <span class="label">Total do IBS/CBS</span>
                     <span class="value"><?= $data['totais']['total_ibs_cbs'] ?? '-' ?></span>
                 </td>
-                <td style="width: 25%;">
+                <td style="width: 25%;" class="section-title">
                     <span class="label">VALOR LÍQUIDO DA NFS-e + IBS/CBS</span>
-                    <span class="value" style="font-weight: bold;"><?= $data['totais']['valor_liquido_ibscbs'] ?? '-' ?></span>
+                    <span class="value"><?= $data['totais']['valor_liquido_ibscbs'] ?? '-' ?></span>
                 </td>
             </tr>
         </table>
