@@ -25,7 +25,7 @@ $tm = $data['tributacao_municipal'] ?? null;
             font-family: Arial, Helvetica, sans-serif;
             font-size: 7pt;
             color: #000;
-            margin: 7pt;
+            margin: 4pt;
             padding: 2pt;
             border: 1pt #000 solid;
             -webkit-box-decoration-break: clone;
@@ -59,7 +59,7 @@ $tm = $data['tributacao_municipal'] ?? null;
         }
 
         td {
-            padding: 1pt 4pt;
+            padding: .3pt 4pt;
             border: none;
             vertical-align: top;
         }
@@ -100,7 +100,7 @@ $tm = $data['tributacao_municipal'] ?? null;
             font-weight: bold;
             color: #000;
             display: block;
-            margin-bottom: 1pt;
+            margin-bottom: 0;
         }
 
         .value {
@@ -108,7 +108,7 @@ $tm = $data['tributacao_municipal'] ?? null;
             font-weight: normal;
             color: #000;
             font-family: sans-serif;
-            margin-bottom: 2pt;
+            margin-bottom: 0;
         }
 
         .section-title {
@@ -123,7 +123,7 @@ $tm = $data['tributacao_municipal'] ?? null;
         }
 
         .header-table {
-            margin-bottom: 2pt;
+            margin-bottom: 0;
             border-bottom: 1px solid #000;
         }
 
