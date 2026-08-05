@@ -12,6 +12,7 @@ Nas NFS-e do ambiente de Homologação, o PDF exibe a mensagem "NFS-e SEM VALIDA
 
 - [DANFSe - Produção](examples/danfse.pdf)
 - [DANFSe - Homologação](examples/danfse-homologacao.pdf)
+- [DANFSe - Cancelado](examples/danfse-cancelado.pdf)
 
 ## Requisitos
 
