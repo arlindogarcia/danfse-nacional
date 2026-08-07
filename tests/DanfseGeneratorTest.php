@@ -877,4 +877,30 @@ class DanfseGeneratorTest extends TestCase
 
         $this->assertNotSame('-', $data['tributacao_municipal']['retencao_issqn']);
     }
+
+    /**
+     * `serv/locPrest` é opcional no XML. A leitura era feita sem null-safe
+     * (`$locPrest->cLocPrestacao`), diferente da expressão vizinha
+     * (`$locPrest?->cPaisPrestacao`), então um XML sem o bloco emitia
+     * "Attempt to read property on null".
+     *
+     * Em aplicações Laravel isso não é apenas um aviso: o handler de erros converte
+     * PHP Warning em ErrorException, e a geração do DANFSe falhava por completo.
+     */
+    public function test_xml_sem_locprest_nao_emite_warning(): void
+    {
+        $xml = file_get_contents(__DIR__ . '/../examples/nfse_exemplo_sem_locprest.xml');
+
+        set_error_handler(static function (int $severity, string $message): bool {
+            throw new \ErrorException($message, 0, $severity);
+        });
+
+        try {
+            $pdf = (new DanfseGenerator())->generateFromXml($xml);
+        } finally {
+            restore_error_handler();
+        }
+
+        $this->assertStringStartsWith('%PDF', $pdf);
+    }
 }

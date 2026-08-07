@@ -219,7 +219,7 @@ class DanfseTemplate
                 'codigo_trib_municipal' => $cServ?->cTribMun ?? '-',
                 'desc_trib' => $this->fmt->limit(!empty($inf?->xTribMun) ? $inf?->xTribMun : $inf?->xTribNac, 170),
                 'codigo_nbs' => $this->fmt->codigoNbs($cServ?->cNBS ?: '-'),
-                'local_prestacao' => (Municipios::lookup($locPrest->cLocPrestacao) ?: '-') . ' / ' . ($locPrest?->cPaisPrestacao ?? '-'),
+                'local_prestacao' => (Municipios::lookup($locPrest?->cLocPrestacao ?? '') ?: '-') . ' / ' . ($locPrest?->cPaisPrestacao ?? '-'),
                 'descricao' => $this->fmt->limit($cServ?->xDescServ ?? '-', 1300),
             ],
 
