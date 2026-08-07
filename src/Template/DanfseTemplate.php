@@ -245,10 +245,14 @@ class DanfseTemplate
                 'desconto_incondicionado' => $tribMun?->vDescIncond ? $this->fmt->currency($tribMun->vDescIncond) : '',
                 // Linha 4  ──────────
                 'valor_servico' => $this->fmt->currency($vServPrest?->vServ ?? ''),
-                'bc_issqn' => $tribMun?->vBC ? $this->fmt->currency($tribMun->vBC) : '-',
-                'aliquota' => $tribMun?->pAliq ? $tribMun->pAliq . '%' : '-',
+                // NT 008/2026: BC ISSQN, ALÍQUOTA APLICADA e ISSQN APURADO saem de
+                // NFSe/infNFSe/valores/ (vBC, pAliqAplic, vISSQN); só a RETENÇÃO sai do
+                // tribMun do DPS. Quando o município apura o imposto, o tribMun declara
+                // apenas pAliq e os valores ficam em infNFSe/valores.
+                'bc_issqn' => $valoresNfse?->vBC ? $this->fmt->currency($valoresNfse->vBC) : '-',
+                'aliquota' => $valoresNfse?->pAliqAplic ? $valoresNfse->pAliqAplic . '%' : '-',
                 'retencao_issqn' => TpRetISSQN::labelFor($tribMun?->tpRetISSQN ?? ''),
-                'issqn_apurado' => $tribMun?->vISSQN ? $this->fmt->currency($tribMun->vISSQN) : '-',
+                'issqn_apurado' => $valoresNfse?->vISSQN ? $this->fmt->currency($valoresNfse->vISSQN) : '-',
             ],
 
             'tributacao_federal' => [
