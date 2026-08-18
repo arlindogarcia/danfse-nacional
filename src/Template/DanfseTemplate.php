@@ -21,6 +21,7 @@ use DanfseNacional\Dto\TotTrib;
 use DanfseNacional\Dto\TribFederal;
 use DanfseNacional\Dto\TribMunicipal;
 use DanfseNacional\Dto\ValoresIbsCbs;
+use DanfseNacional\Dto\ValoresNFSe;
 use DanfseNacional\Enums\AmbGerador;
 use DanfseNacional\Enums\FinNFSe;
 use DanfseNacional\Enums\OpSimpNac;
@@ -146,7 +147,7 @@ class DanfseTemplate
 
         // Bloco de Tributação IBS/CBS (somente quando há grupo IBS/CBS no XML).
         $ibsCbs = ($ibsCbsNfse !== null || $ibsCbsDps !== null)
-            ? $this->buildIbsCbs($gIBSCBS, $ibsCbsDps, $ibsCbsNfse, $valIbs, $totC, $tribMun, $tribFed)
+            ? $this->buildIbsCbs($gIBSCBS, $ibsCbsDps, $ibsCbsNfse, $valIbs, $totC, $tribMun, $tribFed, $valoresNfse)
             : null;
 
         // Nota 6 (NT-008): PIS, COFINS e Descrição Contrib. Sociais - Retidas só
@@ -395,6 +396,7 @@ class DanfseTemplate
         ?TotCIbs $tot,
         ?TribMunicipal $tribMun,
         ?TribFederal $tribFed,
+        ?ValoresNFSe $valoresNfse,
     ): array {
         $uf = $val?->uf;
         $mun = $val?->mun;
@@ -419,7 +421,7 @@ class DanfseTemplate
             'exclusoes_reducoes' => $this->sumCurrency(
                 $tribMun?->vDescIncond ?? '',
                 $val?->vCalcReeRepRes ?? '',
-                $tribMun?->vISSQN ?? '',
+                $valoresNfse?->vISSQN ?? '',
                 $tribFed?->piscofins?->vPis ?? '',
                 $tribFed?->piscofins?->vCofins ?? '',
             ),

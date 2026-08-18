@@ -855,10 +855,8 @@ class DanfseGeneratorTest extends TestCase
      */
     public function test_issqn_apurado_pelo_municipio_vem_de_infnfse_valores(): void
     {
-        $xml = file_get_contents(__DIR__ . '/../examples/nfse_exemplo_issqn_apurado_pelo_municipio.xml');
-
         $data = (new \DanfseNacional\Template\DanfseTemplate())
-            ->buildData((new DanfseGenerator())->parseXml($xml));
+            ->buildData((new DanfseGenerator())->parseXml($this->realXml));
 
         $this->assertSame('R$ 1.350,00', $data['tributacao_municipal']['bc_issqn']);
         $this->assertSame('2.00%', $data['tributacao_municipal']['aliquota']);
@@ -870,10 +868,8 @@ class DanfseGeneratorTest extends TestCase
      */
     public function test_retencao_issqn_continua_vindo_do_tribmun_do_dps(): void
     {
-        $xml = file_get_contents(__DIR__ . '/../examples/nfse_exemplo_issqn_apurado_pelo_municipio.xml');
-
         $data = (new \DanfseNacional\Template\DanfseTemplate())
-            ->buildData((new DanfseGenerator())->parseXml($xml));
+            ->buildData((new DanfseGenerator())->parseXml($this->realXml));
 
         $this->assertNotSame('-', $data['tributacao_municipal']['retencao_issqn']);
     }
@@ -889,7 +885,7 @@ class DanfseGeneratorTest extends TestCase
      */
     public function test_xml_sem_locprest_nao_emite_warning(): void
     {
-        $xml = file_get_contents(__DIR__ . '/../examples/nfse_exemplo_sem_locprest.xml');
+        $xml = preg_replace('#\s*<locPrest>.*?</locPrest>#s', '', $this->realXml);
 
         set_error_handler(static function (int $severity, string $message): bool {
             throw new \ErrorException($message, 0, $severity);
